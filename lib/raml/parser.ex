@@ -31,11 +31,11 @@ defmodule RAML.Parser do
     %Root{
       title: to_string(title),
       resources: parse_resources(yaml_document),
-      version: parse_optional_string(:version, yaml_document),
-      description: parse_optional_string(:description, yaml_document),
-      base_uri: parse_optional_string(:baseUri, yaml_document),
-      media_type: parse_optional_string(:mediaType, yaml_document),
-      protocols: parse_optional_list_of_strings(:protocols, yaml_document)
+      version: parse_optional(:version, yaml_document),
+      description: parse_optional(:description, yaml_document),
+      base_uri: parse_optional(:baseUri, yaml_document),
+      media_type: parse_optional(:mediaType, yaml_document),
+      protocols: parse_optional(:protocols, yaml_document)
     }
   end
 
@@ -97,28 +97,25 @@ defmodule RAML.Parser do
 
   defp parse_type_definition(properties) do
     %Type{
-      example: parse_optional_string(:example, properties)
+      example: parse_optional(:example, properties)
     }
   end
 
-  defp parse_optional_string(name, yaml) do
+  defp parse_optional(name, yaml) do
     charlist_name = to_charlist(name)
     case Enum.find(yaml, &match?({^charlist_name, _}, &1)) do
-      {^charlist_name, result} ->
-        to_string(result)
-      nil ->
-        nil
+      {^charlist_name, body} ->
+        parse_by_type(body)
+      nil -> nil
     end
   end
 
-  defp parse_optional_list_of_strings(name, yaml) do
-    charlist_name = to_charlist(name)
-    case Enum.find(yaml, &match?({^charlist_name, _}, &1)) do
-      {^charlist_name, list} ->
-        list
-        |> Enum.map(fn item -> to_string(item) end)
-      nil ->
-        nil
-    end
+  defp parse_by_type(body) when body == [] or body |> hd |> is_list do
+    body
+    |> Enum.map(fn item -> to_string(item) end)
+  end
+
+  defp parse_by_type(body) when is_list(body) do
+    to_string(body)
   end
 end
