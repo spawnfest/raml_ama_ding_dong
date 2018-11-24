@@ -44,7 +44,13 @@ defmodule RAMLParserTest do
       |> Map.fetch!(:media_types)
       |> Map.fetch!("application/json")
       |> Map.fetch!(:example)
-    assert example_response == ~S<{"message": "Hello World"}>
+      |> Map.fetch!(:value)
+    assert example_response == ~C<{"message": "Hello World"}>
+  end
+
+  test "parses types" do
+    _parsed = Parser.parse(fixture("types.raml"))
+    # IO.inspect(parsed)  # FIXME
   end
 
   defp fixture(file_name) do
