@@ -45,7 +45,11 @@ defmodule RAMLValidatorTest do
   end
 
   test "validates additional_properties" do
-    fields = %{"one" => 1, "two" => 2, "additional_property" => "Not defined in RAML"}
+    fields = %{
+      "one" => 1,
+      "two" => 2,
+      "additional_property" => "Not defined in RAML"
+    }
     assert {:ok, fields} == Validator.validate(
       fields,
       "AdditionalPropertiesTrue",
@@ -118,7 +122,7 @@ defmodule RAMLValidatorTest do
           unique_items: true
        }]
     )
-    
+
     assert {:ok, fields} == Validator.validate(
       fields,
       "NilUniqueItems",

@@ -1,7 +1,6 @@
 defmodule RAML.Validator do
-  def validate(fields, declaration, types) when
-  is_map(fields) and
-  is_bitstring(declaration) do
+  def validate(fields, declaration, types)
+  when is_map(fields) and is_binary(declaration) do
     type = get_type(types, declaration)
 
     with :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
@@ -14,10 +13,8 @@ defmodule RAML.Validator do
     end
   end
 
-  def validate(fields, declaration, types) when
-  is_list(fields) and
-  is_bitstring(declaration) do
-
+  def validate(fields, declaration, types)
+  when is_list(fields) and is_binary(declaration) do
     type = get_type(types, declaration)
 
     with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
@@ -27,9 +24,7 @@ defmodule RAML.Validator do
   end
 
   def validate_max_properties(fields, max) when is_integer(max) do
-    actual = fields
-    |> Map.keys
-    |> length
+    actual = Map.size(fields)
 
     case actual <= max do
       true  -> :ok
@@ -42,9 +37,7 @@ defmodule RAML.Validator do
   end
 
   def validate_min_properties(fields, min) when is_integer(min) do
-    actual = fields
-    |> Map.keys
-    |> length
+    actual = Map.size(fields)
 
     case actual >= min do
       true  -> :ok
@@ -87,12 +80,7 @@ defmodule RAML.Validator do
   end
 
   def validate_min_items(fields, nil) do
-    case length(fields) >= 0 do
-      true ->
-        :ok
-      false ->
-        {:error, :min_items}
-    end
+    validate_min_items(fields, 0)
   end
 
   def validate_min_items(fields, min) do
@@ -107,6 +95,6 @@ defmodule RAML.Validator do
   defp get_type(types, declaration) do
     types
     |> Enum.filter(fn type -> type.name == declaration end)
-    |> List.first
+    |> hd
   end
 end
