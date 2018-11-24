@@ -87,40 +87,12 @@ defmodule RAML.Parser do
       facets: facets,
       enum: parse_optional(properties, :enum)
     }
-    |> attach_parsed_examples(properties)
     |> add_parsed_object_facets(properties)
-  end
-
-  defp attach_parsed_examples(attachable, properties) do
-    case parse_optional(properties, :examples) do
-      examples when is_list(examples) ->
-        Map.put(
-          attachable,
-          :examples,
-          Enum.into(examples, Map.new, fn {name, example} ->
-            {to_string(name), parse_example(example)}
-          end)
-        )
-      nil ->
-        Map.put(
-          attachable,
-          :example,
-          parse_optional(properties, :example, &parse_example/1)
-        )
-    end
-  end
-
-  defp parse_example(properties) do
-    case Enum.find(properties, &match?({'value', _value}, &1)) do
-      {'value', value} ->
-        strict = parse_optional(properties, :strict)
-        %Example{
-          value: value,
-          strict: (if is_boolean(strict), do: strict, else: true)
-        }
-      nil ->
-        %Example{value: properties}
-    end
+    |> add_parsed_array_facets(properties)
+    |> add_parsed_string_facets(properties)
+    |> add_parsed_number_facets(properties)
+    |> add_parsed_file_facets(properties)
+    |> attach_parsed_examples(properties)
   end
 
   defp add_parsed_object_facets(object, properties) do
@@ -153,6 +125,77 @@ defmodule RAML.Parser do
         {(if required != false, do: "?", else: ""), type}
       nil ->
         {"", properties}
+    end
+  end
+
+  defp add_parsed_array_facets(array, properties) do
+    Map.merge(
+      array,
+      %{
+        unique_items: parse_optional(properties, :uniqueItems),
+        items: parse_optional(properties, :items),
+        min_items: parse_optional(properties, :minItems),
+        max_items: parse_optional(properties, :maxItems)
+      }
+    )
+  end
+
+  defp add_parsed_string_facets(string, properties) do
+    Map.merge(
+      string,
+      %{
+        pattern: parse_optional(properties, :pattern),
+        min_length: parse_optional(properties, :minLength),
+        max_length: parse_optional(properties, :maxLength)
+      }
+    )
+  end
+
+  defp add_parsed_number_facets(number, properties) do
+    Map.merge(
+      number,
+      %{
+        minimum: parse_optional(properties, :minimum),
+        maximum: parse_optional(properties, :maximum),
+        format: parse_optional_string(properties, :format),
+        multiple_of: parse_optional(properties, :multipleOf)
+      }
+    )
+  end
+
+  defp add_parsed_file_facets(file, properties) do
+    Map.put(file, :multiple_of, parse_optional(properties, :multipleOf))
+  end
+
+  defp attach_parsed_examples(attachable, properties) do
+    case parse_optional(properties, :examples) do
+      examples when is_list(examples) ->
+        Map.put(
+          attachable,
+          :examples,
+          Enum.into(examples, Map.new, fn {name, example} ->
+            {to_string(name), parse_example(example)}
+          end)
+        )
+      nil ->
+        Map.put(
+          attachable,
+          :example,
+          parse_optional(properties, :example, &parse_example/1)
+        )
+    end
+  end
+
+  defp parse_example(properties) do
+    case Enum.find(properties, &match?({'value', _value}, &1)) do
+      {'value', value} ->
+        strict = parse_optional(properties, :strict)
+        %Example{
+          value: value,
+          strict: (if is_boolean(strict), do: strict, else: true)
+        }
+      nil ->
+        %Example{value: properties}
     end
   end
 
