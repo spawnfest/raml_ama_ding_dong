@@ -34,6 +34,22 @@ defmodule RAMLParserTest do
     assert parsed.resources |> hd |> Map.fetch!(:path) == "/hello"
   end
 
+  test "parses method details" do
+    parsed = Parser.parse(fixture("hello_world.raml"))
+    example_response =
+      parsed.resources
+      |> hd
+      |> Map.fetch!(:methods)
+      |> Map.fetch!(:get)
+      |> Map.fetch!(:responses)
+      |> Map.fetch!("200")
+      |> Map.fetch!(:body)
+      |> Map.fetch!(:media_types)
+      |> Map.fetch!("application/json")
+      |> Map.fetch!(:example)
+    assert example_response == ~S<{"message": "Hello World"}>
+  end
+
   defp fixture(file_name) do
     Path.expand("support/fixtures/#{file_name}", __DIR__)
   end

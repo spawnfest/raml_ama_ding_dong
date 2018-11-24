@@ -1,3 +1,3 @@
 defmodule RAML.Body do
-  defstruct ~w[]a
+  defstruct ~w[media_types]a
 end
