@@ -1,5 +1,5 @@
 defmodule RAML.Parser do
-  alias RAML.{Root, Resource, Method, Response, Body, Type}
+  alias RAML.Nodes.{Root, Resource, Method, Response, Body, TypeDeclaration}
 
   def parse(path) do
     enforce_raml_comment(path)
@@ -88,13 +88,13 @@ defmodule RAML.Parser do
         name in ~w[type example examples]c
       end)
       |> Enum.into(Map.new, fn {media_type, properties} ->
-        {to_string(media_type), parse_type_definition(properties)}
+        {to_string(media_type), parse_type_declaration(properties)}
       end)
     %Body{media_types: media_types}
   end
 
-  defp parse_type_definition(properties) do
-    %Type{
+  defp parse_type_declaration(properties) do
+    %TypeDeclaration{
       example: parse_example(properties)
     }
   end

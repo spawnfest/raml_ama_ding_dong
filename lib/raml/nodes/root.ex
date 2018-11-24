@@ -1,3 +1,3 @@
-defmodule RAML.Root do
+defmodule RAML.Nodes.Root do
   defstruct ~w[title resources version base_uri media_type]a
 end
