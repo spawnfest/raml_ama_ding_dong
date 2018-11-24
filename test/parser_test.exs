@@ -19,17 +19,11 @@ defmodule RAMLParserTest do
     assert parsed_hello_world.version == nil
     assert parsed_one_type.version == "V1"
 
-    assert parsed_hello_world.description == nil
-    assert parsed_one_type.description == "API with Types description"
-
     assert parsed_hello_world.base_uri == nil
     assert parsed_one_type.base_uri == "http://example.com/api"
 
     assert parsed_hello_world.media_type == nil
     assert parsed_one_type.media_type == "application/json"
-
-    assert parsed_hello_world.protocols == nil
-    assert parsed_one_type.protocols == ["HTTP", "HTTPS"]
   end
 
   test "parses resources" do
