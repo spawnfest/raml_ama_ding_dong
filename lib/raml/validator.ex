@@ -20,7 +20,8 @@ defmodule RAML.Validator do
 
     type = get_type(types, declaration)
 
-    with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)) do
+    with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
+         :ok <- validate_min_items(fields, Map.get(type, :min_items)) do
       {:ok, fields}
     end
   end
@@ -83,6 +84,24 @@ defmodule RAML.Validator do
 
   def validate_unique_items(_, nil) do
     :ok
+  end
+
+  def validate_min_items(fields, nil) do
+    case length(fields) >= 0 do
+      true ->
+        :ok
+      false ->
+        {:error, :min_items}
+    end
+  end
+
+  def validate_min_items(fields, min) do
+    case length(fields) >= min do
+      true  ->
+        :ok
+      false ->
+        {:error, :min_items}
+    end
   end
 
   defp get_type(types, declaration) do

@@ -118,12 +118,46 @@ defmodule RAMLValidatorTest do
           unique_items: true
        }]
     )
-
+    
     assert {:ok, fields} == Validator.validate(
       fields,
       "NilUniqueItems",
       [%TypeDeclaration{
           name: "NilUniqueItems",
+          type: "array"
+       }]
+    )
+  end
+
+  test "validates_min_items" do
+    fields = Enum.to_list(1..10)
+
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "NoLessThanTwo",
+      [%TypeDeclaration{
+          name: "NoLessThanTwo",
+          type: "array",
+          min_items: 2
+       }]
+    )
+
+    assert {:error, :min_items} == Validator.validate(
+      fields,
+      "NoLessThanEleven",
+      [%TypeDeclaration{
+          name: "NoLessThanEleven",
+          type: "array",
+          min_items: 11
+       }]
+    )
+
+    crazy_huge_field = Enum.to_list(1..10000)
+    assert {:ok, crazy_huge_field} == Validator.validate(
+      crazy_huge_field,
+      "NilMinItems",
+      [%TypeDeclaration{
+          name: "NilMinItems",
           type: "array"
        }]
     )
