@@ -49,8 +49,16 @@ defmodule RAMLParserTest do
   end
 
   test "parses types" do
-    _parsed = Parser.parse(fixture("types.raml"))
-    # IO.inspect(parsed)  # FIXME
+    parsed = Parser.parse(fixture("types.raml"))
+
+    org = Enum.find(parsed.types, fn type -> type.name == "Org" end)
+    assert org.properties["Head"] == "Manager"
+
+    manager = Enum.find(parsed.types, fn type -> type.name == "Manager" end)
+    assert manager.type == "Person"
+
+    person = Enum.find(parsed.types, fn type -> type.name == "Person" end)
+    assert person.type == "object"
   end
 
   test "parses nested resources" do
