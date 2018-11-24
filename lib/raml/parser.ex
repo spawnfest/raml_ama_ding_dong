@@ -1,5 +1,5 @@
 defmodule RAML.Parser do
-  alias RAML.{Root, Resource, Method, Response}
+  alias RAML.{Root, Resource, Method, Response, Body}
 
   def parse(path) do
     enforce_raml_comment(path)
@@ -7,6 +7,7 @@ defmodule RAML.Parser do
     path
     |> read_yaml
     |> parse_root
+    # |> IO.inspect
   end
 
   defp enforce_raml_comment(path) do
@@ -74,8 +75,15 @@ defmodule RAML.Parser do
   end
 
   defp parse_response(properties) do
+    {'body', body} =
+      Enum.find(properties, {'body', %{ }}, &match?({'body', _body}, &1))
     %Response{
+      body: parse_body(body)
     }
+  end
+
+  defp parse_body(_properties) do
+    %Body{}
   end
 
   defp parse_optional_string(name, yaml) do
