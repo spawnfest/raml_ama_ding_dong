@@ -1,3 +1,3 @@
 defmodule RAML.Root do
-  defstruct ~w[title resources]a
+  defstruct ~w[title resources version]a
 end

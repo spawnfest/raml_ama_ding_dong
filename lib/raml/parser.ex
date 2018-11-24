@@ -29,7 +29,8 @@ defmodule RAML.Parser do
     {'title', title} = Enum.find(yaml_document, &match?({'title', _title}, &1))
     %Root{
       title: to_string(title),
-      resources: parse_resources(yaml_document)
+      resources: parse_resources(yaml_document),
+      version: parse_version(yaml_document)
     }
   end
 
@@ -43,5 +44,14 @@ defmodule RAML.Parser do
     %Resource{
       path: to_string(path)
     }
+  end
+
+  defp parse_version(yaml_document) do
+    if (Enum.any?(yaml_document, &match?({'version', _version}, &1))) do
+      {'version', version} = Enum.find(yaml_document, &match?({'version', _version}, &1))
+      to_string version
+    else
+      nil
+    end
   end
 end

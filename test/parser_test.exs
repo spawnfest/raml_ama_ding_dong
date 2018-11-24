@@ -14,6 +14,14 @@ defmodule RAMLParserTest do
     assert parsed.title == "Hello World"
   end
 
+  test "parses version" do
+    parsed_without_version = Parser.parse(fixture("hello_world.raml"))
+    parsed_with_version    = Parser.parse(fixture("one_type.raml"))
+
+    assert parsed_with_version.version == "V1"
+    assert parsed_without_version.version == nil
+  end
+
   test "parses resources" do
     parsed = Parser.parse(fixture("hello_world.raml"))
     assert parsed.resources |> hd |> Map.fetch!(:path) == "/hello"
