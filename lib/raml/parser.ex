@@ -7,7 +7,6 @@ defmodule RAML.Parser do
     path
     |> read_yaml
     |> parse_root
-    |> IO.inspect
   end
 
   defp enforce_raml_comment(path) do
@@ -80,11 +79,11 @@ defmodule RAML.Parser do
 
   defp parse_optional_string(name, yaml) do
     charlist_name = to_charlist(name)
-    if (Enum.any?(yaml, &match?({^charlist_name, _}, &1))) do
-      {^charlist_name, result} = Enum.find(yaml, &match?({^charlist_name, _}, &1))
-      to_string result
-    else
-      nil
+    case Enum.find(yaml, &match?({^charlist_name, _}, &1)) do
+      {^charlist_name, result} ->
+        to_string(result)
+      nil ->
+        nil
     end
   end
 end
