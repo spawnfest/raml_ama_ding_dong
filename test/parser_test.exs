@@ -6,17 +6,17 @@ defmodule RAMLParserTest do
     assert_raise RuntimeError, fn ->
       Parser.parse(fixture("not_raml.txt"))
     end
-    assert not is_nil(Parser.parse(fixture("minimal.raml")))
+    assert not is_nil(Parser.parse(fixture("hello_world.raml")))
   end
 
   test "parses root fields" do
-    parsed = Parser.parse(fixture("minimal.raml"))
-    assert parsed.title == "API with Types"
+    parsed = Parser.parse(fixture("hello_world.raml"))
+    assert parsed.title == "Hello World"
   end
 
   test "parses resources" do
-    parsed = Parser.parse(fixture("minimal.raml"))
-    assert parsed.resources |> hd |> Map.fetch!(:path) == "/users/{id}"
+    parsed = Parser.parse(fixture("hello_world.raml"))
+    assert parsed.resources |> hd |> Map.fetch!(:path) == "/hello"
   end
 
   defp fixture(file_name) do
