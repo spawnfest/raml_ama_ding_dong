@@ -34,7 +34,8 @@ defmodule RAML.Parser do
       version: parse_optional_string(:version, yaml_document),
       description: parse_optional_string(:description, yaml_document),
       base_uri: parse_optional_string(:baseUri, yaml_document),
-      media_type: parse_optional_string(:mediaType, yaml_document)
+      media_type: parse_optional_string(:mediaType, yaml_document),
+      protocols: parse_optional_list_of_strings(:protocols, yaml_document)
     }
   end
 
@@ -91,6 +92,17 @@ defmodule RAML.Parser do
     case Enum.find(yaml, &match?({^charlist_name, _}, &1)) do
       {^charlist_name, result} ->
         to_string(result)
+      nil ->
+        nil
+    end
+  end
+
+  defp parse_optional_list_of_strings(name, yaml) do
+    charlist_name = to_charlist(name)
+    case Enum.find(yaml, &match?({^charlist_name, _}, &1)) do
+      {^charlist_name, list} ->
+        list
+        |> Enum.map(fn item -> to_string(item) end)
       nil ->
         nil
     end
