@@ -43,4 +43,56 @@ defmodule RAMLValidatorTest do
       [%TypeDeclaration{name: "NoMinProperties"}]
     )
   end
+
+  test "validates additional_properties" do
+    fields = %{"one" => 1, "two" => 2, "additional_property" => "Not defined in RAML"}
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "AdditionalPropertiesTrue",
+      [%TypeDeclaration{
+          name: "AdditionalPropertiesTrue",
+          additional_properties: true,
+          properties: %{
+            "one" => %{type: "string"},
+            "two" => %{type: "string"}
+          }}]
+    )
+
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "AdditionalPropertiesNil",
+      [%TypeDeclaration{
+          name: "AdditionalPropertiesNil",
+          properties: %{
+            "one" => %{type: "string"},
+            "two" => %{type: "string"}
+          }}]
+    )
+
+    assert {:error, :additional_properties} == Validator.validate(
+      fields,
+      "AdditionalPropertiesNil",
+      [%TypeDeclaration{
+          name: "AdditionalPropertiesNil",
+          additional_properties: false,
+          properties: %{
+            "one" => %{type: "string"},
+            "two" => %{type: "string"}
+          }}]
+    )
+
+
+    valid_fields = Map.delete(fields, "additional_properties")
+
+    assert {:ok, valid_fields} == Validator.validate(
+      valid_fields,
+      "AdditionalPropertiesNil",
+      [%TypeDeclaration{
+          name: "AdditionalPropertiesNil",
+          properties: %{
+            "one" => %{type: "string"},
+            "two" => %{type: "string"}
+          }}]
+    )
+  end
 end

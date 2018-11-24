@@ -5,7 +5,11 @@ defmodule RAML.Validator do
     |> List.first
 
     with :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
-         :ok <- validate_min_properties(fields, Map.get(type, :min_properties)) do
+         :ok <- validate_min_properties(fields, Map.get(type, :min_properties)),
+         :ok <- validate_additional_properties(
+           fields,
+           Map.get(type, :properties),
+           Map.get(type, :additional_properties)) do
       {:ok, fields}
     end
   end
@@ -39,4 +43,19 @@ defmodule RAML.Validator do
   def validate_min_properties(_, _) do
     :ok
   end
- end
+
+  def validate_additional_properties(_, _, true) do
+    :ok
+  end
+
+  def validate_additional_properties(fields, properties, false) do
+    case Map.keys(properties) == Map.keys(fields) do
+      true  -> :ok
+      false -> {:error, :additional_properties}
+    end
+  end
+
+  def validate_additional_properties(_, _, nil) do
+    :ok
+  end
+end
