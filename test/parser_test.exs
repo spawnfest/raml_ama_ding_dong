@@ -53,6 +53,22 @@ defmodule RAMLParserTest do
     # IO.inspect(parsed)  # FIXME
   end
 
+  test "parses nested resources" do
+    parsed = Parser.parse(fixture("nested_resources.raml"))
+
+    users = Enum.find(parsed.resources, fn r -> r.path == "/users" end)
+    assert users.path == "/users"
+
+    [identified_user] = users.resources
+    assert identified_user.path == "/{userId}"
+
+    keys = Enum.find(identified_user.resources, fn r -> r.path == "/keys" end)
+    assert keys.path == "/keys"
+
+    [identified_key] = keys.resources
+    assert identified_key.path == "/{keyId}"
+  end
+
   defp fixture(file_name) do
     Path.expand("support/fixtures/#{file_name}", __DIR__)
   end

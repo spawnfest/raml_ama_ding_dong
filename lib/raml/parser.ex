@@ -8,6 +8,7 @@ defmodule RAML.Parser do
 
     path
     |> read_yaml
+    |> convert_null_to_nil
     |> parse_root
   end
 
@@ -26,6 +27,18 @@ defmodule RAML.Parser do
            raise "Expected one YAML document"
        end
   end
+
+  defp convert_null_to_nil(yaml) when is_list(yaml) do
+    Enum.map(yaml, fn item -> convert_null_to_nil(item) end)
+  end
+  defp convert_null_to_nil(yaml) when is_tuple(yaml) do
+    yaml
+    |> Tuple.to_list
+    |> Enum.map(fn item -> convert_null_to_nil(item) end)
+    |> List.to_tuple
+  end
+  defp convert_null_to_nil(:null), do: nil
+  defp convert_null_to_nil(yaml), do: yaml
 
   defp parse_root(yaml_document) do
     {'title', title} = Enum.find(yaml_document, &match?({'title', _title}, &1))
@@ -201,6 +214,7 @@ defmodule RAML.Parser do
 
   defp parse_resources(yaml_document) do
     yaml_document
+    |> Kernel.||([ ])
     |> Enum.filter(&match?({[?/ | _path], _resource}, &1))
     |> Enum.map(&parse_resource/1)
   end
@@ -208,6 +222,7 @@ defmodule RAML.Parser do
   defp parse_resource({path, properties}) do
     methods =
       properties
+      |> Kernel.||([ ])
       |> Enum.filter(fn {name, _property} ->
         name in ~w[get patch put post delete options head]c
       end)
@@ -216,7 +231,8 @@ defmodule RAML.Parser do
       end)
     %Resource{
       path: to_string(path),
-      methods: methods
+      methods: methods,
+      resources: parse_resources(properties)
     }
   end
 
