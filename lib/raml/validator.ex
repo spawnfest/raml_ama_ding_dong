@@ -1,8 +1,8 @@
 defmodule RAML.Validator do
-  def validate(fields, declaration, types) do
-    type = types
-    |> Enum.filter(fn type -> type.name == declaration end)
-    |> List.first
+  def validate(fields, declaration, types) when
+  is_map(fields) and
+  is_bitstring(declaration) do
+    type = get_type(types, declaration)
 
     with :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
          :ok <- validate_min_properties(fields, Map.get(type, :min_properties)),
@@ -10,6 +10,17 @@ defmodule RAML.Validator do
            fields,
            Map.get(type, :properties),
            Map.get(type, :additional_properties)) do
+      {:ok, fields}
+    end
+  end
+
+  def validate(fields, declaration, types) when
+  is_list(fields) and
+  is_bitstring(declaration) do
+
+    type = get_type(types, declaration)
+
+    with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)) do
       {:ok, fields}
     end
   end
@@ -57,5 +68,26 @@ defmodule RAML.Validator do
 
   def validate_additional_properties(_, _, nil) do
     :ok
+  end
+
+  def validate_unique_items(fields, true) do
+    case Enum.uniq(fields) == fields do
+      true  -> :ok
+      false -> {:error, :unique_items}
+    end
+  end
+
+  def validate_unique_items(_, false) do
+    :ok
+  end
+
+  def validate_unique_items(_, nil) do
+    :ok
+  end
+
+  defp get_type(types, declaration) do
+    types
+    |> Enum.filter(fn type -> type.name == declaration end)
+    |> List.first
   end
 end

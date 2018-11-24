@@ -95,4 +95,37 @@ defmodule RAMLValidatorTest do
           }}]
     )
   end
+
+  test "validates unique_items" do
+    fields = [1, 2, 3, 1]
+
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "FalseUniqueItems",
+      [%TypeDeclaration{
+          name: "FalseUniqueItems",
+          type: "array",
+          unique_items: false
+       }]
+    )
+
+    assert {:error, :unique_items} == Validator.validate(
+      fields,
+      "TrueUniqueItems",
+      [%TypeDeclaration{
+          name: "TrueUniqueItems",
+          type: "array",
+          unique_items: true
+       }]
+    )
+
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "NilUniqueItems",
+      [%TypeDeclaration{
+          name: "NilUniqueItems",
+          type: "array"
+       }]
+    )
+  end
 end
