@@ -3,7 +3,7 @@ defmodule RAMLValidatorTest do
   alias RAML.Validator
   alias RAML.Nodes.TypeDeclaration
 
-  test "validates RAML comment and version" do
+  test "validates max_properties" do
     fields = %{"one" => 1, "two" => 2}
     assert {:ok, fields} == Validator.validate(
       fields,
@@ -14,6 +14,33 @@ defmodule RAMLValidatorTest do
       Map.put(fields, "three", 3),
       "NoMoreThanTwo",
       [%TypeDeclaration{name: "NoMoreThanTwo", max_properties: 2}]
+    )
+
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "NoMaxProperties",
+      [%TypeDeclaration{name: "NoMaxProperties"}]
+    )
+  end
+
+  test "validates min_properties" do
+    fields = %{"one" => 1, "two" => 2}
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "NoLessThanTwo",
+      [%TypeDeclaration{name: "NoLessThanTwo", min_properties: 2}]
+    )
+    assert {:error, :min_properties} == Validator.validate(
+      Map.delete(fields, "two"),
+      "NoLessThanTwo",
+      [%TypeDeclaration{name: "NoLessThanTwo", min_properties: 2}]
+    )
+
+    lotsa_fields = Map.merge(fields, %{"three" => 3, "four" => 4})
+    assert {:ok, lotsa_fields} == Validator.validate(
+      lotsa_fields,
+      "NoMinProperties",
+      [%TypeDeclaration{name: "NoMinProperties"}]
     )
   end
 end

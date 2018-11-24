@@ -4,7 +4,8 @@ defmodule RAML.Validator do
     |> Enum.filter(fn type -> type.name == declaration end)
     |> List.first
 
-    with :ok <- validate_max_properties(fields, type.max_properties) do
+    with :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
+         :ok <- validate_min_properties(fields, Map.get(type, :min_properties)) do
       {:ok, fields}
     end
   end
@@ -20,7 +21,22 @@ defmodule RAML.Validator do
     end
   end
 
-  def validate_max_properties(fields, _) do
-    {:ok, fields}
+  def validate_max_properties(_, _) do
+    :ok
+  end
+
+  def validate_min_properties(fields, min) when is_integer(min) do
+    actual = fields
+    |> Map.keys
+    |> length
+
+    case actual >= min do
+      true  -> :ok
+      false -> {:error, :min_properties}
+    end
+  end
+
+  def validate_min_properties(_, _) do
+    :ok
   end
  end
