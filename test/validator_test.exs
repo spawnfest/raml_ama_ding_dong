@@ -59,7 +59,7 @@ defmodule RAMLValidatorTest do
           properties: %{
             "one" => %{type: "string"},
             "two" => %{type: "string"}
-          }}]
+         }}]
     )
 
     assert {:ok, fields} == Validator.validate(
@@ -86,7 +86,7 @@ defmodule RAMLValidatorTest do
     )
 
 
-    valid_fields = Map.delete(fields, "additional_properties")
+    valid_fields = Map.delete(fields, "additional_property")
 
     assert {:ok, valid_fields} == Validator.validate(
       valid_fields,
