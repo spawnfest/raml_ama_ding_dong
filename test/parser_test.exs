@@ -30,6 +30,14 @@ defmodule RAMLParserTest do
     assert parsed_without_description.description == nil
   end
 
+  test "parses base_uri" do
+    parsed_without_base_uri = Parser.parse(fixture("hello_world.raml"))
+    parsed_with_base_uri    = Parser.parse(fixture("one_type.raml"))
+
+    assert parsed_with_base_uri.base_uri == "http://example.com"
+    assert parsed_without_base_uri.base_uri == nil
+  end
+
   test "parses resources" do
     parsed = Parser.parse(fixture("hello_world.raml"))
     assert parsed.resources |> hd |> Map.fetch!(:path) == "/hello"
