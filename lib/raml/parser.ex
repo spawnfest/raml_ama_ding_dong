@@ -32,7 +32,8 @@ defmodule RAML.Parser do
       resources: parse_resources(yaml_document),
       version: parse_optional_string(:version, yaml_document),
       description: parse_optional_string(:description, yaml_document),
-      base_uri: parse_optional_string(:baseUri, yaml_document)
+      base_uri: parse_optional_string(:baseUri, yaml_document),
+      media_type: parse_optional_string(:mediaType, yaml_document)
     }
   end
 

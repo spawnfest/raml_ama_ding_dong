@@ -10,32 +10,23 @@ defmodule RAMLParserTest do
   end
 
   test "parses root fields" do
-    parsed = Parser.parse(fixture("hello_world.raml"))
-    assert parsed.title == "Hello World"
-  end
+    parsed_hello_world = Parser.parse(fixture("hello_world.raml"))
+    parsed_one_type    = Parser.parse(fixture("one_type.raml"))
 
-  test "parses version" do
-    parsed_without_version = Parser.parse(fixture("hello_world.raml"))
-    parsed_with_version    = Parser.parse(fixture("one_type.raml"))
+    assert parsed_hello_world.title == "Hello World"
+    assert parsed_one_type.title == "API with Types"
 
-    assert parsed_with_version.version == "V1"
-    assert parsed_without_version.version == nil
-  end
+    assert parsed_hello_world.version == nil
+    assert parsed_one_type.version == "V1"
 
-  test "parses description" do
-    parsed_without_description = Parser.parse(fixture("hello_world.raml"))
-    parsed_with_description    = Parser.parse(fixture("one_type.raml"))
+    assert parsed_hello_world.description == nil
+    assert parsed_one_type.description == "API with Types description"
 
-    assert parsed_with_description.description == "API with Types description"
-    assert parsed_without_description.description == nil
-  end
+    assert parsed_hello_world.base_uri == nil
+    assert parsed_one_type.base_uri == "http://example.com/api"
 
-  test "parses base_uri" do
-    parsed_without_base_uri = Parser.parse(fixture("hello_world.raml"))
-    parsed_with_base_uri    = Parser.parse(fixture("one_type.raml"))
-
-    assert parsed_with_base_uri.base_uri == "http://example.com"
-    assert parsed_without_base_uri.base_uri == nil
+    assert parsed_hello_world.media_type == nil
+    assert parsed_one_type.media_type == "application/json"
   end
 
   test "parses resources" do
