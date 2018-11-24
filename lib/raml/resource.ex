@@ -1,3 +1,3 @@
 defmodule RAML.Resource do
-  defstruct ~w[path]a
+  defstruct ~w[path methods]a
 end

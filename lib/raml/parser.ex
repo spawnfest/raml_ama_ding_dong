@@ -1,5 +1,5 @@
 defmodule RAML.Parser do
-  alias RAML.{Root, Resource}
+  alias RAML.{Root, Resource, Method, Response}
 
   def parse(path) do
     enforce_raml_comment(path)
@@ -7,6 +7,7 @@ defmodule RAML.Parser do
     path
     |> read_yaml
     |> parse_root
+    |> IO.inspect
   end
 
   defp enforce_raml_comment(path) do
@@ -42,9 +43,38 @@ defmodule RAML.Parser do
     |> Enum.map(&parse_resource/1)
   end
 
-  defp parse_resource({path, _properties}) do
+  defp parse_resource({path, properties}) do
+    methods =
+      properties
+      |> Enum.filter(fn {name, _property} ->
+        name in ~w[get patch put post delete options head]c
+      end)
+      |> Enum.into(Map.new, fn {verb, properties} ->
+        {String.to_atom(to_string(verb)), parse_method(properties)}
+      end)
     %Resource{
-      path: to_string(path)
+      path: to_string(path),
+      methods: methods
+    }
+  end
+
+  defp parse_method(properties) do
+    responses =
+      properties
+      |> Enum.find({'responses', %{ }}, &match?({'responses', _responses}, &1))
+      |> elem(1)
+      |> parse_responses
+    %Method{responses: responses}
+  end
+
+  defp parse_responses(all_properties) do
+    Enum.into(all_properties, Map.new, fn {status_code, properties} ->
+      {to_string(status_code), parse_response(properties)}
+    end)
+  end
+
+  defp parse_response(properties) do
+    %Response{
     }
   end
 
