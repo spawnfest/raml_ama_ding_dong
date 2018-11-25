@@ -29,12 +29,21 @@ types:
       url: string
       example:
         url: http://localhost:4001/r/example
+  URL:
+    type: string
+    example: http://example.com/
 /redirects:
   put:
     queryString: Redirect
     responses: 
       200:
         body: Saved
+/r/{name}:
+  get:
+    responses:
+      302:
+        headers:
+          Location: URL
 ```
 
 ### Step 2:  Play With Your Not-Yet-Finished API 
