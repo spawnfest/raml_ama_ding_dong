@@ -271,4 +271,39 @@ defmodule RAMLValidatorTest do
        }]
     )
   end
+
+  test "validate_max_length_string" do
+    value = "hello"
+
+    assert {:ok, value} == Validator.validate(
+      value,
+      "NoMoreThanFive",
+      [%TypeDeclaration{
+          name: "NoMoreThanFive",
+          type: "string",
+          max_length: 5
+       }]
+    )
+
+    assert {:error, :max_length} == Validator.validate(
+      value,
+      "NoMoreThanTwo",
+      [%TypeDeclaration{
+          name: "NoMoreThanTwo",
+          type: "string",
+          max_length: 2
+       }]
+    )
+
+    crazy_long_string = Enum.to_list(1..10000) |> Enum.join
+
+    assert {:ok, crazy_long_string} == Validator.validate(
+      crazy_long_string,
+      "NilMaxLength",
+      [%TypeDeclaration{
+          name: "NilMaxLength",
+          type: "string"
+       }]
+    )
+  end
 end

@@ -29,7 +29,8 @@ defmodule RAML.Validator do
     type = get_type(types, declaration)
 
     with :ok <- validate_pattern(value, Map.get(type, :pattern)),
-         :ok <- validate_min_length(value, Map.get(type, :min_length)) do
+         :ok <- validate_min_length(value, Map.get(type, :min_length)),
+         :ok <- validate_max_length(value, Map.get(type, :max_length)) do
       {:ok, value}
     end
   end
@@ -144,6 +145,20 @@ defmodule RAML.Validator do
         :ok
       false ->
         {:error, :min_length}
+    end
+  end
+
+  def validate_max_length(value, nil) do
+    validate_max_length(value, 2147483647)
+  end
+
+  def validate_max_length(value, l) do
+    size = String.length(value)
+    case size <= l do
+      true ->
+        :ok
+      false ->
+        {:error, :max_length}
     end
   end
 
