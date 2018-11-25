@@ -69,8 +69,8 @@ defmodule RAMLValidatorTest do
       [%TypeDeclaration{
           name: "AdditionalPropertiesNil",
           properties: %{
-            "one" => %{type: "string"},
-            "two" => %{type: "string"}
+            "one" => %TypeDeclaration{type: "string"},
+            "two" => %TypeDeclaration{type: "string"}
           }}]
     )
 
@@ -81,8 +81,8 @@ defmodule RAMLValidatorTest do
           name: "AdditionalPropertiesNil",
           additional_properties: false,
           properties: %{
-            "one" => %{type: "string"},
-            "two" => %{type: "string"}
+            "one" => %TypeDeclaration{type: "string"},
+            "two" => %TypeDeclaration{type: "string"}
           }}]
     )
 
@@ -95,8 +95,8 @@ defmodule RAMLValidatorTest do
       [%TypeDeclaration{
           name: "AdditionalPropertiesNil",
           properties: %{
-            "one" => %{type: "string"},
-            "two" => %{type: "string"}
+            "one" => %TypeDeclaration{type: "string"},
+            "two" => %TypeDeclaration{type: "string"}
           }}]
     )
   end
