@@ -1,15 +1,22 @@
 defmodule RAML.Validator do
+  alias RAML.Nodes.TypeDeclaration
+
   def validate(fields, declaration, types)
   when is_map(fields) and is_binary(declaration) do
     type = get_type(types, declaration)
 
-    with :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
+    with {:ok, property_fields} <- validate_properties(
+           fields,
+           Map.get(type, :properties) || Map.new,
+           types
+         ),
+         :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
          :ok <- validate_min_properties(fields, Map.get(type, :min_properties)),
            :ok <- validate_additional_properties(
              fields,
              Map.get(type, :properties),
              Map.get(type, :additional_properties)) do
-      {:ok, fields}
+      {:ok, Map.merge(fields, property_fields)}
     end
   end
 
@@ -61,6 +68,24 @@ defmodule RAML.Validator do
           {:ok, number}
         end
     end
+  end
+
+  def validate_properties(fields, properties, types) do
+    properties
+    |> Enum.reduce_while(Map.new, fn {name, declaration}, combined ->
+      case validate(Map.get(fields, name), declaration, types) do
+        {:ok, property_fields} ->
+          {:cont, Map.put(combined, name, property_fields)}
+        error ->
+          {:halt, error}
+      end
+    end)
+    |> case do
+         property_fields when is_map(property_fields) ->
+           {:ok, property_fields}
+         error ->
+           error
+       end
   end
 
   def validate_max_properties(fields, max) when is_integer(max) do
@@ -240,6 +265,9 @@ defmodule RAML.Validator do
     end
   end
 
+  defp get_type(_types, %TypeDeclaration{ } = declaration) do
+    declaration
+  end
   defp get_type(types, declaration) do
     types
     |> Enum.filter(fn type -> type.name == declaration end)

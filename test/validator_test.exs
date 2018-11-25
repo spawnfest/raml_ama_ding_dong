@@ -57,8 +57,8 @@ defmodule RAMLValidatorTest do
           name: "AdditionalPropertiesTrue",
           additional_properties: true,
           properties: %{
-            "one" => %{type: "string"},
-            "two" => %{type: "string"}
+            "one" => %TypeDeclaration{type: "string"},
+            "two" => %TypeDeclaration{type: "string"}
          }}]
     )
 
