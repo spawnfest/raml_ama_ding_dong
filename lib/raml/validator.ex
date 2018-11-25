@@ -18,7 +18,8 @@ defmodule RAML.Validator do
     type = get_type(types, declaration)
 
     with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
-         :ok <- validate_min_items(fields, Map.get(type, :min_items)) do
+         :ok <- validate_min_items(fields, Map.get(type, :min_items)),
+         :ok <- validate_max_items(fields, Map.get(type, :max_items)) do
       {:ok, fields}
     end
   end
@@ -89,6 +90,19 @@ defmodule RAML.Validator do
         :ok
       false ->
         {:error, :min_items}
+    end
+  end
+
+  def validate_max_items(fields, nil) do
+    validate_max_items(fields, 2147483647)
+  end
+
+  def validate_max_items(fields, max) do
+    case length(fields) <= max do
+      true ->
+        :ok
+      false ->
+        {:error, :max_items}
     end
   end
 

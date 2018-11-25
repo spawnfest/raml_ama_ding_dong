@@ -156,12 +156,46 @@ defmodule RAMLValidatorTest do
        }]
     )
 
-    crazy_huge_field = Enum.to_list(1..10000)
-    assert {:ok, crazy_huge_field} == Validator.validate(
-      crazy_huge_field,
+    empty_field = []
+    assert {:ok, empty_field} == Validator.validate(
+      empty_field,
       "NilMinItems",
       [%TypeDeclaration{
           name: "NilMinItems",
+          type: "array"
+       }]
+    )
+  end
+
+  test "validates_max_items" do
+    fields = Enum.to_list(1..10)
+
+    assert {:ok, fields} == Validator.validate(
+      fields,
+      "NoMoreThanEleven",
+      [%TypeDeclaration{
+          name: "NoMoreThanEleven",
+          type: "array",
+          max_items: 11
+       }]
+    )
+
+    assert {:error, :max_items} == Validator.validate(
+      fields,
+      "NoMoreThanFive",
+      [%TypeDeclaration{
+          name: "NoMoreThanFive",
+          type: "array",
+          max_items: 5
+       }]
+    )
+
+    crazy_huge_fields = Enum.to_list(1..100000)
+    assert {:ok, crazy_huge_fields} == Validator.validate(
+      crazy_huge_fields,
+      "NilNaxItems",
+      [%TypeDeclaration{
+          name: "NilNaxItems",
           type: "array"
        }]
     )
