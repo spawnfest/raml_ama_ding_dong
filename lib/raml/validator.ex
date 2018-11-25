@@ -38,11 +38,20 @@ defmodule RAML.Validator do
   def validate(number, declaration, types)
   when is_number(number) and is_binary(declaration) do
     type = get_type(types, declaration)
+    number_type = type.type
 
-    with :ok <- validate_minimum_number(number, Map.get(type, :minimum)),
-         :ok <- validate_maximum_number(number, Map.get(type, :maximum)),
-         :ok <- validate_multiple_of(number, Map.get(type, :multiple_of)) do
-      {:ok, number}
+    case number_type do
+      "number" ->
+        with :ok <- validate_minimum_number(number, Map.get(type, :minimum)),
+             :ok <- validate_maximum_number(number, Map.get(type, :maximum)) do
+          {:ok, number}
+        end
+      "integer" ->
+        with :ok <- validate_minimum_number(number, Map.get(type, :minimum)),
+             :ok <- validate_maximum_number(number, Map.get(type, :maximum)),
+             :ok <- validate_multiple_of(number, Map.get(type, :multiple_of)) do
+          {:ok, number}
+        end
     end
   end
 

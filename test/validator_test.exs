@@ -371,7 +371,7 @@ defmodule RAMLValidatorTest do
     )
   end
 
-  test "validate_multiple_of_number" do
+  test "validate_multiple_of_integer" do
     even     = 1000
     odd      = 1001
 
@@ -380,7 +380,7 @@ defmodule RAMLValidatorTest do
       "Even",
       [%TypeDeclaration{
           name: "Even",
-          type: "number",
+          type: "integer",
           multiple_of: 2
        }]
     )
@@ -390,7 +390,7 @@ defmodule RAMLValidatorTest do
       "Even",
       [%TypeDeclaration{
           name: "Even",
-          type: "number",
+          type: "integer",
           multiple_of: 2
        }]
     )
@@ -400,7 +400,7 @@ defmodule RAMLValidatorTest do
       "NilMultipleOf",
       [%TypeDeclaration{
           name: "NilMultipleOf",
-          type: "number"
+          type: "integer"
        }]
     )
   end
