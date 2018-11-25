@@ -186,6 +186,40 @@ at the end of the list of `children` in `lib/raml_redirects/application.ex`:
       RamlRedirects.UrlTable
 ```
 
+We can now make use of that service to store and retrieve URLs as the endpoints
+of our API are exercised.  We just need to define a callback module to handle
+the various types of requests and the scaffolded API will automatically switch 
+over to using our real implementation.  Drop this code into 
+`lib/raml_redirects/api.ex`:
+
+```Elixir
+defmodule RamlRedirects.Api do
+  alias RamlRedirects.UrlTable
+
+  def call("/redirects", :put, request) do
+    name = Map.fetch!(request.params, "name")
+    UrlTable.set_redirect(name, Map.fetch!(request.params, "url"))
+    {200, Map.new, %{"shortened" => "http://localhost:4001/r/#{name}"}}
+  end
+
+  def call("/r/{name}", :get, request) do
+    case UrlTable.get_redirect(Map.fetch!(request.params, "name")) do
+      url when is_binary(url) ->
+        {302, %{"Location" => url}, ""}
+      nil ->
+        {404, Map.new, "Not found\n"}
+    end
+  end
+end
+```
+
+Of course, we need to tell the RAML code how to find this module, so add 
+one more line to the end of the `config/config.exs`:
+
+```Elixir
+config :raml_ama_ding_dong, processing_module: RamlRedirects.Api
+```
+
 FIXME
 
 ### Step 4:  Next Steps
@@ -195,6 +229,9 @@ What we have so far is definitely a useful subset, but there's plenty more
 to do.  We would eventually love to:
 
 * Support the rest of the specification!
+* Provide more tools for building API code, leveraging the RAML specification 
+  when possible.  For example, it would be nice to have a `link()` helper 
+  function that's aware of `baseUri`.
 * Generate matching client code from a RAML file.
 * Provide tools to ensure that a response validates in automated server tests
   and that request validate in automated client tests.
