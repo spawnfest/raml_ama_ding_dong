@@ -46,8 +46,8 @@ defmodule RAMLValidatorTest do
 
   test "validates additional_properties" do
     fields = %{
-      "one" => 1,
-      "two" => 2,
+      "one" => "1",
+      "two" => "2",
       "additional_property" => "Not defined in RAML"
     }
     assert {:ok, fields} == Validator.validate(
@@ -56,9 +56,10 @@ defmodule RAMLValidatorTest do
       [%TypeDeclaration{
           name: "AdditionalPropertiesTrue",
           additional_properties: true,
+          type: "object",
           properties: %{
-            "one" => %TypeDeclaration{type: "string"},
-            "two" => %TypeDeclaration{type: "string"}
+            "one" => %TypeDeclaration{type: "string", name: "one"},
+            "two" => %TypeDeclaration{type: "string", name: "two"}
          }}]
     )
 

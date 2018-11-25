@@ -2,7 +2,7 @@ defmodule RAML.Validator do
   alias RAML.Nodes.TypeDeclaration
 
   def validate(fields, declaration, types)
-  when is_map(fields) and is_binary(declaration) do
+  when is_map(fields) do
     type = get_type(types, declaration)
 
     with {:ok, property_fields} <- validate_properties(
@@ -21,7 +21,7 @@ defmodule RAML.Validator do
   end
 
   def validate(fields, declaration, types)
-  when is_list(fields) and is_binary(declaration) do
+  when is_list(fields) do
     type = get_type(types, declaration)
 
     with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
@@ -32,7 +32,7 @@ defmodule RAML.Validator do
   end
 
   def validate(value, declaration, types)
-  when is_binary(value) and is_binary(declaration) do
+  when is_binary(value) do
     type = get_type(types, declaration)
     string_type = type.type
 
@@ -51,7 +51,7 @@ defmodule RAML.Validator do
   end
 
   def validate(number, declaration, types)
-  when is_number(number) and is_binary(declaration) do
+  when is_number(number) do
     type = get_type(types, declaration)
     number_type = type.type
 
