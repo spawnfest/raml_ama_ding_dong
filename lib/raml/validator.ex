@@ -290,11 +290,11 @@ defmodule RAML.Validator do
   defp get_type(_types, %TypeDeclaration{type: type} = declaration) when type == "object" or type == "string" or type == "array" or type == "date-only" or type == "integer" or type == "number" do
     declaration
   end
-  defp get_type(types, %TypeDeclaration{type: type} = declaration) do
+  defp get_type(types, %TypeDeclaration{type: type}) do
     found_type = types |> Enum.find(&(&1.name == type))
 
     if !found_type.type do
-      %TypeDeclaration{declaration | type: "object"}
+      %TypeDeclaration{found_type | type: "object"}
     else
       found_type
     end

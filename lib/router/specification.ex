@@ -48,9 +48,12 @@ defmodule RAML.Specification do
         params = Map.merge(query_params, get_uri_params(resource.path, path))
         type_to_validate = Map.get(resource.methods, method).query_string
 
-        RAML.Validator.validate(params, type_to_validate, types) |> IO.inspect
-
-        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, params)
+        case RAML.Validator.validate(params, type_to_validate, types) do
+          {:error, message} ->
+            make_error_response(message)
+          {:ok, _fields} ->
+            handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, params)
+        end
       else
         :not_found -> not_found_response()
         :method_not_allowed -> method_not_allowed_response()
@@ -78,6 +81,14 @@ defmodule RAML.Specification do
     {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
 
     %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
+  end
+
+  def make_error_response(message) do
+    %{
+      headers: [{"content-type", "text/plain"}],
+      status: 400,
+      body: "Error: #{message}\n"
+    }
   end
 
   def not_found_response do

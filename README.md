@@ -250,8 +250,15 @@ If we try to save a URL under an invalid name, we'll receive an error even
 though we didn't write any parameter checking code:
 
 ```bash
-$ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects?name=not+allowed&url=http://example.com'
-FIXME
+$ curl -i -X PUT -H 'content-type: application/json' 'localhost:4001/redirects?name=not+allowed&url=http://example.com'
+HTTP/1.1 400 Bad Request
+cache-control: max-age=0, private, must-revalidate
+content-length: 16
+content-type: text/plain
+date: Sun, 25 Nov 2018 23:34:43 GMT
+server: Cowboy
+
+Error:  pattern
 ```
 
 Handy, right?
