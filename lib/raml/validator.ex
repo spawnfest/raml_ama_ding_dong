@@ -19,7 +19,7 @@ defmodule RAML.Validator do
 
     with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
          :ok <- validate_min_items(fields, Map.get(type, :min_items)),
-           :ok <- validate_max_items(fields, Map.get(type, :max_items)) do
+         :ok <- validate_max_items(fields, Map.get(type, :max_items)) do
       {:ok, fields}
     end
   end
@@ -40,7 +40,8 @@ defmodule RAML.Validator do
     type = get_type(types, declaration)
 
     with :ok <- validate_minimum_number(number, Map.get(type, :minimum)),
-         :ok <- validate_maximum_number(number, Map.get(type, :maximum)) do
+         :ok <- validate_maximum_number(number, Map.get(type, :maximum)),
+         :ok <- validate_multiple_of(number, Map.get(type, :multiple_of)) do
       {:ok, number}
     end
   end
@@ -194,6 +195,20 @@ defmodule RAML.Validator do
         :ok
       false ->
         {:error, :maximum}
+    end
+  end
+
+  def validate_multiple_of(_, nil) do
+    :ok
+  end
+
+  def validate_multiple_of(dividend, divisor) do
+    remainder = rem(dividend, divisor)
+    case remainder == 0 do
+      true ->
+        :ok
+      false ->
+        {:error, :multiple_of}
     end
   end
 

@@ -371,4 +371,37 @@ defmodule RAMLValidatorTest do
     )
   end
 
+  test "validate_multiple_of_number" do
+    even     = 1000
+    odd      = 1001
+
+    assert {:ok, even} == Validator.validate(
+      even,
+      "Even",
+      [%TypeDeclaration{
+          name: "Even",
+          type: "number",
+          multiple_of: 2
+       }]
+    )
+
+    assert {:error, :multiple_of} == Validator.validate(
+      odd,
+      "Even",
+      [%TypeDeclaration{
+          name: "Even",
+          type: "number",
+          multiple_of: 2
+       }]
+    )
+
+    assert {:ok, odd} == Validator.validate(
+      odd,
+      "NilMultipleOf",
+      [%TypeDeclaration{
+          name: "NilMultipleOf",
+          type: "number"
+       }]
+    )
+  end
 end
