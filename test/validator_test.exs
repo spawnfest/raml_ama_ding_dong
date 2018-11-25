@@ -3,23 +3,54 @@ defmodule RAMLValidatorTest do
   alias RAML.Validator
   alias RAML.Nodes.TypeDeclaration
 
+  test "validates value type matches string type declaration" do
+    assert [1, 1.0, %{}, []]
+    |> Enum.map(fn item ->
+      Validator.validate(
+        item,
+        "String",
+        [%TypeDeclaration{name: "String", type: "string"}]) end)
+        |> Enum.all?(fn item -> item == {:error, "Expected string"} end)
+
+  end
+
+  test "validates value type matches array type declaration" do
+    assert ["", 1, 1.0, "2018-11-11", %{}]
+    |> Enum.map(fn item ->
+      Validator.validate(
+        item,
+        "Array",
+        [%TypeDeclaration{name: "Array", type: "array"}]) end)
+        |> Enum.all?(fn item -> item == {:error, "Expected array"} end)
+  end
+
+  test "validates value type matches object type declaration" do
+    assert ["", 1, 1.0, "2018-11-11", ["y"]]
+    |> Enum.map(fn item ->
+      Validator.validate(
+        item,
+        "Object",
+        [%TypeDeclaration{name: "Object", type: "object"}]) end)
+    |> Enum.all?(fn item -> item == {:error, "Expected object"} end)
+  end
+
   test "validates max_properties" do
     fields = %{"one" => 1, "two" => 2}
     assert {:ok, fields} == Validator.validate(
       fields,
       "NoMoreThanTwo",
-      [%TypeDeclaration{name: "NoMoreThanTwo", max_properties: 2}]
+      [%TypeDeclaration{name: "NoMoreThanTwo", max_properties: 2, type: "object"}]
     )
     assert {:error, :max_properties} == Validator.validate(
       Map.put(fields, "three", 3),
       "NoMoreThanTwo",
-      [%TypeDeclaration{name: "NoMoreThanTwo", max_properties: 2}]
+      [%TypeDeclaration{name: "NoMoreThanTwo", max_properties: 2, type: "object"}]
     )
 
     assert {:ok, fields} == Validator.validate(
       fields,
       "NoMaxProperties",
-      [%TypeDeclaration{name: "NoMaxProperties"}]
+      [%TypeDeclaration{name: "NoMaxProperties", type: "object"}]
     )
   end
 
@@ -28,19 +59,19 @@ defmodule RAMLValidatorTest do
     assert {:ok, fields} == Validator.validate(
       fields,
       "NoLessThanTwo",
-      [%TypeDeclaration{name: "NoLessThanTwo", min_properties: 2}]
+      [%TypeDeclaration{name: "NoLessThanTwo", min_properties: 2, type: "object"}]
     )
     assert {:error, :min_properties} == Validator.validate(
       Map.delete(fields, "two"),
       "NoLessThanTwo",
-      [%TypeDeclaration{name: "NoLessThanTwo", min_properties: 2}]
+      [%TypeDeclaration{name: "NoLessThanTwo", min_properties: 2, type: "object"}]
     )
 
     lotsa_fields = Map.merge(fields, %{"three" => 3, "four" => 4})
     assert {:ok, lotsa_fields} == Validator.validate(
       lotsa_fields,
       "NoMinProperties",
-      [%TypeDeclaration{name: "NoMinProperties"}]
+      [%TypeDeclaration{name: "NoMinProperties", type: "object"}]
     )
   end
 
@@ -68,9 +99,10 @@ defmodule RAMLValidatorTest do
       "AdditionalPropertiesNil",
       [%TypeDeclaration{
           name: "AdditionalPropertiesNil",
+          type: "object",
           properties: %{
-            "one" => %TypeDeclaration{type: "string"},
-            "two" => %TypeDeclaration{type: "string"}
+            "one" => %TypeDeclaration{type: "string", name: "one"},
+            "two" => %TypeDeclaration{type: "string", name: "two"}
           }}]
     )
 
@@ -79,10 +111,11 @@ defmodule RAMLValidatorTest do
       "AdditionalPropertiesNil",
       [%TypeDeclaration{
           name: "AdditionalPropertiesNil",
+          type: "object",
           additional_properties: false,
           properties: %{
-            "one" => %TypeDeclaration{type: "string"},
-            "two" => %TypeDeclaration{type: "string"}
+            "one" => %TypeDeclaration{type: "string", name: "one"},
+            "two" => %TypeDeclaration{type: "string", name: "two"}
           }}]
     )
 
@@ -94,9 +127,10 @@ defmodule RAMLValidatorTest do
       "AdditionalPropertiesNil",
       [%TypeDeclaration{
           name: "AdditionalPropertiesNil",
+          type: "object",
           properties: %{
-            "one" => %TypeDeclaration{type: "string"},
-            "two" => %TypeDeclaration{type: "string"}
+            "one" => %TypeDeclaration{type: "string", name: "one"},
+            "two" => %TypeDeclaration{type: "string", name: "two"}
           }}]
     )
   end

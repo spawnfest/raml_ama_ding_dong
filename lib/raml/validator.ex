@@ -5,7 +5,8 @@ defmodule RAML.Validator do
   when is_map(fields) do
     type = get_type(types, declaration)
 
-    with {:ok, property_fields} <- validate_properties(
+    with :ok <- validate_type(Map.get(type, :type), :object),
+         {:ok, property_fields} <- validate_properties(
            fields,
            Map.get(type, :properties) || Map.new,
            types
@@ -24,7 +25,8 @@ defmodule RAML.Validator do
   when is_list(fields) do
     type = get_type(types, declaration)
 
-    with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
+    with :ok <- validate_type(Map.get(type, :type), :array),
+         :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
          :ok <- validate_min_items(fields, Map.get(type, :min_items)),
          :ok <- validate_max_items(fields, Map.get(type, :max_items)) do
       {:ok, fields}
@@ -47,6 +49,8 @@ defmodule RAML.Validator do
         with :ok <- validate_date_only(value) do
           {:ok, value}
         end
+      _ ->
+        {:error, "Expected #{string_type}"}
     end
   end
 
@@ -67,7 +71,25 @@ defmodule RAML.Validator do
              :ok <- validate_multiple_of(number, Map.get(type, :multiple_of)) do
           {:ok, number}
         end
+      _ ->
+        {:error, "Expected #{number_type}"}
     end
+  end
+
+  def validate_type("array", :array) do
+    :ok
+  end
+
+  def validate_type(type, :array) do
+    {:error, "Expected #{type}"}
+  end
+
+  def validate_type("object", :object) do
+    :ok
+  end
+
+  def validate_type(type, :object) do
+    {:error, "Expected #{type}"}
   end
 
   def validate_properties(fields, properties, types) do
