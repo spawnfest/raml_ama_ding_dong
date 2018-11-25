@@ -109,18 +109,10 @@ defmodule RAML.Parser do
   end
 
   defp add_parsed_object_facets(object, properties) do
-    object_properties =
-      properties
-      |> Enum.find({'properties', []}, &match?({'properties', _properties}, &1))
-      |> elem(1)
-      |> Enum.into(Map.new, fn {name, type} ->
-        {name_suffix, raw_type} = parse_property_declaration(type)
-        {to_string(name) <> name_suffix, parse_type(raw_type)}
-      end)
     Map.merge(
       object,
       %{
-        properties: object_properties,
+        properties: parse_property_list(properties, :properties),
         min_properties: parse_optional(properties, :minProperties),
         max_properties: parse_optional(properties, :maxProperties),
         additional_properties: parse_optional(properties, :additionalProperties),
@@ -129,6 +121,18 @@ defmodule RAML.Parser do
           parse_optional_string(properties, :discriminatorValue)
       }
     )
+  end
+
+  defp parse_property_list(properties, name) do
+    charlist_name = to_charlist(name)
+    properties
+    |> Kernel.||([ ])
+    |> Enum.find({charlist_name, []}, &match?({^charlist_name, _properties}, &1))
+    |> elem(1)
+    |> Enum.into(Map.new, fn {name, type} ->
+      {name_suffix, raw_type} = parse_property_declaration(type)
+      {to_string(name) <> name_suffix, parse_type(raw_type)}
+    end)
   end
 
   defp parse_property_declaration(properties) do
@@ -236,6 +240,7 @@ defmodule RAML.Parser do
       end)
     %Resource{
       path: to_string(path),
+      uri_parameters: parse_property_list(properties, :uriParameters),
       methods: methods,
       resources: parse_resources(properties)
     }
@@ -247,7 +252,24 @@ defmodule RAML.Parser do
       |> Enum.find({'responses', %{ }}, &match?({'responses', _responses}, &1))
       |> elem(1)
       |> parse_responses
-    %Method{responses: responses}
+    %Method{
+      headers: parse_property_list(properties, :headers),
+      responses: responses
+    }
+    |> attach_parsed_query(properties)
+  end
+
+  defp attach_parsed_query(attachable, properties) do
+    case parse_property_list(properties, :query_parameters) do
+      query when is_map(query) and map_size(query) > 0 ->
+        Map.put(attachable, :query_parameters, query)
+      %{ } ->
+        Map.put(
+          attachable,
+          :query_string,
+          parse_optional(properties, :queryString, &parse_type/1)
+        )
+    end
   end
 
   defp parse_responses(all_properties) do
@@ -260,6 +282,7 @@ defmodule RAML.Parser do
     {'body', body} =
       Enum.find(properties, {'body', [ ]}, &match?({'body', _body}, &1))
     %Response{
+      headers: parse_property_list(properties, :headers),
       body: parse_body(body)
     }
   end

@@ -1,3 +1,3 @@
 defmodule RAML.Nodes.Method do
-  defstruct ~w[responses]a
+  defstruct ~w[headers query_parameters query_string responses]a
 end

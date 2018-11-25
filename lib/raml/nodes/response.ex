@@ -1,3 +1,3 @@
 defmodule RAML.Nodes.Response do
-  defstruct ~w[body]a
+  defstruct ~w[headers body]a
 end

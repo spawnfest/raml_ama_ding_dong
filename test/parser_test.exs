@@ -78,8 +78,17 @@ defmodule RAMLParserTest do
   end
 
   test "parses the example file" do
-    _parsed = Parser.parse(fixture("raml_redirects.raml"))
-    # IO.inspect(parsed)  # FIXME
+    parsed = Parser.parse(fixture("raml_redirects.raml"))
+
+    redirects = Enum.find(parsed.resources, fn r -> r.path == "/redirects" end)
+    assert redirects.methods.put.query_string == "Redirect"
+
+    redirect = Enum.find(parsed.types, fn type -> type.name == "Redirect" end)
+    assert redirect.properties == %{"name" => "Name", "url" => "URL"}
+
+    forward = Enum.find(parsed.resources, fn r -> r.path == "/r/{name}" end)
+    assert forward.uri_parameters == %{"name" => "Name"}
+    assert forward.methods.get.responses["302"].headers == %{"Location" => "URL"}
   end
 
   defp fixture(file_name) do

@@ -8,9 +8,16 @@ implementation is intended to show off its utility.
 
 ## How do I use this thing?
 
-The best way to learn a little about RAML is to use it to build something.  This example will walk you through the construction of a two action API for creating and using 
+The best way to learn a little about RAML is to use it to build something.
+This example will walk you through the construction of a two action API for 
+creating and using short URL redirects.  This is enough to show much of the
+functionality of RAML.
+
+Let's get started.
 
 ### Step 1:  Write a RAML Specification
+
+When using RAML we begin by describing the API we want to build in RAML syntax.  Here's the file for our API:
 
 ```YAML
 #%RAML 1.0
@@ -18,29 +25,31 @@ title: RAML Redirects
 baseUri: http://localhost:4001
 mediaType: application/json
 types:
-  Redirect:
-    properties:
-      name:
-        type: string
-        pattern: '\A[-a-zA-Z0-9_]+\z'
-      url:
-        type: string
-        pattern: '\A\S+\z'
-  Saved:
-    properties:
-      url: string
-      example:
-        url: http://localhost:4001/r/example
+  Name:
+    type: string
+    pattern: '\A[-a-zA-Z0-9_]+\z'
   URL:
     type: string
+    pattern: '\A\S+\z'
     example: http://example.com/
+  Redirect:
+    properties:
+      name: Name
+      url: URL
+  ShortURL:
+    properties:
+      shortened: URL
+      example:
+        shortened: http://localhost:4001/r/example
 /redirects:
   put:
     queryString: Redirect
     responses: 
       200:
-        body: Saved
+        body: ShortURL
 /r/{name}:
+  uriParameters:
+    name: Name
   get:
     responses:
       302:
