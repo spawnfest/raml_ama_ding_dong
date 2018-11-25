@@ -187,7 +187,17 @@ That module needs to be started with our application, so add the following line
 at the end of the list of `children` in `lib/raml_redirects/application.ex`:
 
 ```Elixir
+  def start(_type, _args) do
+    # List all child processes to be supervised
+    children = [
       RamlRedirects.UrlTable
+    ]
+
+    # See https://hexdocs.pm/elixir/Supervisor.html
+    # for other strategies and supported options
+    opts = [strategy: :one_for_one, name: RamlRedirects.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
 ```
 
 We can now make use of that service to store and retrieve URLs as the endpoints
