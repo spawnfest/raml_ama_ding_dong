@@ -133,7 +133,7 @@ defmodule RAMLValidatorTest do
     )
   end
 
-  test "validates_min_items" do
+  test "validates_min_items_array" do
     fields = Enum.to_list(1..10)
 
     assert {:ok, fields} == Validator.validate(
@@ -167,7 +167,7 @@ defmodule RAMLValidatorTest do
     )
   end
 
-  test "validates_max_items" do
+  test "validates_max_items_array" do
     fields = Enum.to_list(1..10)
 
     assert {:ok, fields} == Validator.validate(
@@ -197,6 +197,39 @@ defmodule RAMLValidatorTest do
       [%TypeDeclaration{
           name: "NilNaxItems",
           type: "array"
+       }]
+    )
+  end
+
+  test "validate_min_length_string" do
+    value = "hello"
+
+    assert {:ok, value} == Validator.validate(
+      value,
+      "NoLessThanFive",
+      [%TypeDeclaration{
+          name: "NoLessThanFive",
+          type: "string",
+          min_length: 5
+       }]
+    )
+
+    assert {:error, :min_length} == Validator.validate(
+      value,
+      "NoLessThanEleven",
+      [%TypeDeclaration{
+          name: "NoLessThanEleven",
+          type: "string",
+          min_length: 11
+       }]
+    )
+
+    assert {:ok, ""} == Validator.validate(
+      "",
+      "NilMinLength",
+      [%TypeDeclaration{
+          name: "NilMinLength",
+          type: "string"
        }]
     )
   end

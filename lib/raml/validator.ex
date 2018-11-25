@@ -5,10 +5,10 @@ defmodule RAML.Validator do
 
     with :ok <- validate_max_properties(fields, Map.get(type, :max_properties)),
          :ok <- validate_min_properties(fields, Map.get(type, :min_properties)),
-         :ok <- validate_additional_properties(
-           fields,
-           Map.get(type, :properties),
-           Map.get(type, :additional_properties)) do
+           :ok <- validate_additional_properties(
+             fields,
+             Map.get(type, :properties),
+             Map.get(type, :additional_properties)) do
       {:ok, fields}
     end
   end
@@ -19,10 +19,21 @@ defmodule RAML.Validator do
 
     with :ok <- validate_unique_items(fields, Map.get(type, :unique_items)),
          :ok <- validate_min_items(fields, Map.get(type, :min_items)),
-         :ok <- validate_max_items(fields, Map.get(type, :max_items)) do
+           :ok <- validate_max_items(fields, Map.get(type, :max_items)) do
       {:ok, fields}
     end
   end
+
+  def validate(value, declaration, types)
+  when is_binary(value) and is_binary(declaration) do
+    type = get_type(types, declaration)
+
+    with :ok <- validate_pattern(value, Map.get(type, :pattern)),
+         :ok <- validate_min_length(value, Map.get(type, :min_length)) do
+      {:ok, value}
+    end
+  end
+
 
   def validate_max_properties(fields, max) when is_integer(max) do
     actual = Map.size(fields)
@@ -106,9 +117,32 @@ defmodule RAML.Validator do
     end
   end
 
+  def validate_pattern(_, nil) do
+    :ok
+  end
+
+  def validate_pattern(_value, _pattern) do
+    :ok #FIXME
+  end
+
+  def validate_min_length(value, nil) do
+    validate_min_length(value, 0)
+  end
+
+  def validate_min_length(value, l) do
+    size = String.length(value)
+    case size >= l do
+      true ->
+        :ok
+      false ->
+        {:error, :min_length}
+    end
+  end
+
   defp get_type(types, declaration) do
     types
     |> Enum.filter(fn type -> type.name == declaration end)
     |> hd
   end
+
 end
