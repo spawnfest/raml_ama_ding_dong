@@ -81,7 +81,7 @@ defmodule RAMLParserTest do
     parsed = Parser.parse(fixture("raml_redirects.raml"))
 
     redirects = Enum.find(parsed.resources, fn r -> r.path == "/redirects" end)
-    assert redirects.methods.put.query_string == "Redirect"
+    assert redirects.methods.put.query_string.type == "Redirect"
     assert redirects.methods.put.responses["200"].body == "ShortURL"
 
     redirect = Enum.find(parsed.types, fn type -> type.name == "Redirect" end)
