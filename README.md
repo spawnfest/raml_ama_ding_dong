@@ -220,14 +220,41 @@ one more line to the end of the `config/config.exs`:
 config :raml_ama_ding_dong, processing_module: RamlRedirects.Api
 ```
 
-Now we can talk to our fully functional API.  Let's send some requests:
+Now we can talk to our fully functional API.  Let's save a shortened URL, 
+then show the redirect to that location:
 
 ```bash
 $ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects?name=ex&url=http://example.com'
 {"shortened":"http://localhost:4001/r/ex"}
+$ curl -i -H 'co ntent-type: application/json' 'localhost:4001/r/ex'
+HTTP/1.1 302 Found
+Location: http://example.com
+cache-control: max-age=0, private, must-revalidate
+content-length: 3
+date: Sun, 25 Nov 2018 22:57:52 GMT
+server: Cowboy
+
+""
 ```
 
+Asking for a redirect that isn't in the system gets us a 404:
+
+```bash
+$ curl -s -i -H 'content-type: application/json' 'localhost:4001/r/not_a_thing' | head -n 1
+HTTP/1.1 404 Not Found
+```
+
+We may be done with the API scaffolding, but RAML is still doing some work 
+for us.  For example, it's validating the params being passed to our actions.
+If we try to save a URL under an invalid name, we'll receive an error even 
+though we didn't write any parameter checking code:
+
+```bash
+$ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects?name=not+allowed&url=http://example.com'
 FIXME
+```
+
+Handy, right?
 
 ### Step 4:  Next Steps
 
