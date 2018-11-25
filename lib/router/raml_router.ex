@@ -13,7 +13,7 @@ defmodule RAML.Router do
     |> send_resp(status, body)
   end
 
-  defp handle_request(%{request_path: path, method: method, req_headers: req_headers}) do
+  defp handle_request(%{path_info: path, method: method, req_headers: req_headers}) do
     method_atom = method |> String.downcase |> String.to_atom
     headers = req_headers |> Enum.into(%{})
     response = RAML.Specification.response_for(path, method_atom, headers)

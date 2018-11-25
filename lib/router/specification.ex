@@ -1,6 +1,8 @@
 defmodule RAML.Specification do
   use GenServer
 
+  alias Router.Resources
+
   def init(state) do
     {:ok, state, {:continue, :finish_init}}
   end
@@ -36,53 +38,38 @@ defmodule RAML.Specification do
 
   def handle_call({:response_for, path, method, headers}, _from, state) do
     content_type = headers["content-type"]
+    default_content_type = Map.get(state.contents, :media_type, :not_supported)
 
     response =
-      state.contents.resources
-      |> Enum.find({:err, :notfound}, &(&1.path == path))
-      |> build_response(method, content_type)
+      with {:ok, resource} <- Resources.get_resource(state.contents, path),
+           {:ok, method} <- Resources.validate_method(resource, method)
+      do
+        handle_method(method, content_type, default_content_type)
+      else
+        :not_found -> not_found_response()
+        :method_not_allowed -> method_not_allowed_response()
+      end
 
     {:reply, response, state}
   end
 
-  defp build_response({:err, :notfound}, _, _) do
+  defp handle_method(_method, _content_type, _default_content_type) do
+    %{ content_type: "text/plain", status: 200, body: "ok" }
+  end
+
+  def not_found_response do
     %{
       content_type: "text/plain",
       status: 404,
-      body: "Not Found"
+      body: "Not Found\n"
     }
   end
-  defp build_response(%{methods: methods}, method, requested_content_type) do
-    methods
-    |> Map.fetch(method)
-    |> handle_method(requested_content_type)
-  end
 
-  defp handle_method(:error, _) do
+  def method_not_allowed_response do
     %{
       content_type: "text/plain",
       status: 405,
-      body: "Method Not Allowed"
-    }
-  end
-  defp handle_method({:ok, method}, requested_content_type) do
-    method.responses["200"].body.media_types
-    |> Map.fetch(requested_content_type)
-    |> handle_content_type(requested_content_type)
-  end
-
-  defp handle_content_type(:error, _) do
-    %{
-      content_type: "text/plain",
-      status: 415,
-      body: "Unsupported Media Type"
-    }
-  end
-  defp handle_content_type({:ok, content_type}, requested_content_type) do
-    %{
-      content_type: requested_content_type,
-      status: 200,
-      body: content_type.example.value || "No Example Provided"
+      body: "Method Not Allowed\n"
     }
   end
 end
