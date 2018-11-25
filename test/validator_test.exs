@@ -201,6 +201,44 @@ defmodule RAMLValidatorTest do
     )
   end
 
+  test "validates_pattern_string" do
+    pattern      = "\\A[-a-zA-Z0-9_]+\\z"
+    good_string  = "hello-world_"
+    bad_string   = "$@@#$^(&)"
+
+    assert {:ok, good_string} == Validator.validate(
+      good_string,
+      "HappyStringPattern",
+      [%TypeDeclaration{
+          name: "HappyStringPattern",
+          type: "string",
+          pattern: pattern
+       }]
+    )
+
+    assert {:error, :pattern} == Validator.validate(
+      bad_string,
+      "BadStringPattern",
+      [%TypeDeclaration{
+          name: "BadStringPattern",
+          type: "string",
+          pattern: pattern
+       }]
+    )
+
+    assert {:ok, good_string} == Validator.validate(
+      good_string,
+      "NilPattern",
+      [%TypeDeclaration{
+          name: "NilPattern",
+          type: "string"
+       }]
+    )
+
+
+
+  end
+
   test "validate_min_length_string" do
     value = "hello"
 

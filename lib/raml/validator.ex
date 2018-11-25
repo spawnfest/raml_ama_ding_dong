@@ -121,8 +121,16 @@ defmodule RAML.Validator do
     :ok
   end
 
-  def validate_pattern(_value, _pattern) do
-    :ok #FIXME
+  def validate_pattern(value, pattern) do
+    matches? = Regex.compile!(pattern) |> Regex.match?(value)
+
+    case matches? do
+      true ->
+        :ok
+      false ->
+        {:error, :pattern}
+    end
+
   end
 
   def validate_min_length(value, nil) do
