@@ -95,7 +95,7 @@ $ mix deps.get
 ```
 
 We need to point the library at our RAML file, so add the following line
-to `config/config.ex`:
+to `config/config.exs`:
 
 ```Elixir
 config :raml_ama_ding_dong, raml_path: "priv/raml_redirects.raml"
