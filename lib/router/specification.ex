@@ -9,8 +9,9 @@ defmodule RAML.Specification do
 
   def start_link(opts) do
     path = Keyword.fetch!(opts, :path)
+    processor = Keyword.get(opts, :processing_module)
 
-    case GenServer.start_link(__MODULE__, %{path: path, contents: nil}, opts) do
+    case GenServer.start_link(__MODULE__, %{path: path, contents: nil, processing_module: processor}, opts) do
       {:error, {:already_started, pid}} -> {:ok, pid}
       {:ok, pid} -> {:ok, pid}
     end
@@ -37,14 +38,14 @@ defmodule RAML.Specification do
   end
 
   def handle_call({:response_for, path, method, headers}, _from, state) do
-    content_type = headers["content-type"]
-    default_content_type = Map.get(state.contents, :media_type, :not_supported)
+    default_content_type = Map.get(state.contents, :media_type, :not_provided)
+    types = state.contents.types
 
     response =
       with {:ok, resource} <- Resources.get_resource(state.contents, path),
-           {:ok, method} <- Resources.validate_method(resource, method)
+           {:ok, matched_method} <- Resources.validate_method(resource, method)
       do
-        handle_method(method, content_type, default_content_type)
+        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types)
       else
         :not_found -> not_found_response()
         :method_not_allowed -> method_not_allowed_response()
@@ -53,8 +54,22 @@ defmodule RAML.Specification do
     {:reply, response, state}
   end
 
-  defp handle_method(_method, _content_type, _default_content_type) do
-    %{ content_type: "text/plain", status: 200, body: "ok" }
+  defp handle_method(nil, _method, _path, _headers, matched_method, default_content_type, types) do
+    # ways this could go wrong
+    # missing media types
+    # missing types
+    # plain example instead of type example
+    # many many more
+
+    resp = matched_method.responses["200"].body
+    example = types |> Enum.find(&(&1.name == resp)) |> Map.get(:example) |> Map.get(:value)
+
+    %{ content_type: "text/plain", status: 200, body: example }
+  end
+  defp handle_method(_module, _method, _path, _headers, _matched_method, _default_content_type, _types) do
+    # give (headers, body, params, route, method)
+    # call function get (headers, status, body)
+    %{ content_type: "text/plain", status: 200, body: "ok\n" }
   end
 
   def not_found_response do
