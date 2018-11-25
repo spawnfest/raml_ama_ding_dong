@@ -4,7 +4,7 @@ defmodule RAML.Application do
   use Application
 
   def start(_type, _args) do
-    path = Application.get_env(:raml_ama_ding_dong, :raml_path) || "test/support/fixtures/raml_redirects.raml"
+    path = Application.get_env(:raml_ama_ding_dong, :raml_path) || "test/support/fixtures/types.raml"
 
     children = [
       Plug.Cowboy.child_spec(scheme: :http, plug: RAML.Router, options: [port: 4001]),

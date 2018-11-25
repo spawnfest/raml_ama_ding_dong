@@ -15,11 +15,11 @@ defmodule ResourcesTest do
     assert result == :not_found
   end
 
-  # test "doesn't match undefined sub routes" do
-  #   result = Router.Resources.get_resource(@types, ["orgs"])
+  test "doesn't match undefined sub routes" do
+    result = Router.Resources.get_resource(@types, ["orgs"])
 
-  #   assert result == :not_found
-  # end
+    assert result == :not_found
+  end
 
   test "returns a resource struct for a matched route" do
     result = Router.Resources.get_resource(@types, ["orgs", "3"])

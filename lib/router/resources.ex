@@ -22,9 +22,15 @@ defmodule Router.Resources do
   end
 
   defp match_route(spec_route, requested_route) do
-    spec_route
-    |> String.split("/", trim: true)
-    |> Enum.zip(requested_route)
-    |> Enum.all?(&route_match(&1))
+    route_list =
+      spec_route
+      |> String.split("/", trim: true)
+
+    with true <- length(route_list) == length(requested_route)
+    do
+      route_list
+      |> Enum.zip(requested_route)
+      |> Enum.all?(&route_match(&1))
+    end
   end
 end
