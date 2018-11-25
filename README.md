@@ -90,6 +90,18 @@ $ git clone git@github.com:spawnfest/raml_ama_ding_dong.git
 $ mix new raml_redirects --sup
 …
 $ cd raml_redirects/
+```
+
+We need to add the RAML library to our project as a dependency, so 
+insert the following line into the end of the `deps` list in `mix.exs`:
+
+```Elixir
+      {:raml_ama_ding_dong, path: "../raml_ama_ding_dong"}
+```
+
+Now fetch the project's dependencies:
+
+```bash
 $ mix deps.get
 …
 ```
