@@ -54,7 +54,7 @@ defmodule RAML.Specification do
     {:reply, response, state}
   end
 
-  defp handle_method(nil, _method, _path, _headers, matched_method, default_content_type, types) do
+  defp handle_method(nil, _method, _path, _headers, matched_method, _default_content_type, types) do
     # ways this could go wrong
     # missing media types
     # missing types
@@ -66,10 +66,13 @@ defmodule RAML.Specification do
 
     %{ content_type: "text/plain", status: 200, body: example }
   end
-  defp handle_method(_module, _method, _path, _headers, _matched_method, _default_content_type, _types) do
+  defp handle_method(module, method, path, headers, _matched_method, _default_content_type, _types) do
+    request = %{headers: headers, params: %{}}
+
+    {status, _headers, body} = :erlang.apply(module, :call, [path, method, request])
     # give (headers, body, params, route, method)
     # call function get (headers, status, body)
-    %{ content_type: "text/plain", status: 200, body: "ok\n" }
+    %{ content_type: "text/plain", status: status, body: body }
   end
 
   def not_found_response do
