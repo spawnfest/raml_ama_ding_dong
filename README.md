@@ -9,7 +9,7 @@ implementation is intended to show off its utility.
 ## How do I use this thing?
 
 The best way to learn a little about RAML is to use it to build something.
-This example will walk you through the construction of a two action API for 
+This example will walk you through the construction of a two-action API for 
 creating and using short URL redirects.  This is enough to show much of the
 functionality of RAML.
 
