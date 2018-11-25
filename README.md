@@ -117,8 +117,12 @@ Now, in a different shell, let's use a command like `curl` to simulate
 a couple of requests to the API:
 
 ```bash
-$ curl -H 'content-type: application/json' 'localhost:4001/hello'
-{"message": "Hello World"}
+$ curl -H 'content-type: application/json' 'localhost:4001/not_an_action'
+Not Found
+$ curl -H 'content-type: application/json' 'localhost:4001/redirects'
+Method Not Allowed
+$ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects'
+FIXME
 ```
 
 Notice how the RAML file was used to determine which URLs to support?  
@@ -127,7 +131,47 @@ the actual code yet.  We're up and running!
 
 ### Step 3:  Implement Actions
 
+A scaffolded API is useful for early exploration, but eventually we're going
+to want our API to run some real code.  Let's move on to looking at how our
+own code gets wired in.
 
+First, let's add a module in `lib/raml_redirects/url_table.ex` that can
+remember and fetch named URLs for later use.  This is the business logic
+for our trivial system, unrelated to RAML or APIs:
+
+```Elixir
+defmodule RamlRedirects.UrlTable do
+  use Agent
+
+  def start_link(_options) do
+    Agent.start_link(fn ->
+      :ets.new(:url_lookup_table, ~w[set public named_table]a)
+    end)
+  end
+
+  def set_redirect(name, url) do
+    :ets.insert(:url_lookup_table, {name, url})
+  end
+
+  def get_redirect(name) do
+    case :ets.lookup(:url_lookup_table, name) do
+      [{^name, url}] ->
+        url
+      [ ] ->
+        nil
+    end
+  end
+end
+```
+
+That module needs to be started with our application, so add the following line
+at the end of the list of `children` in `lib/raml_redirects/application.ex`:
+
+```Elixir
+      RamlRedirects.UrlTable
+```
+
+FIXME
 
 ### Step 4:  Next Steps
 
