@@ -404,4 +404,27 @@ defmodule RAMLValidatorTest do
        }]
     )
   end
+
+  test "validate_date_only" do
+    valid_date_only = "2018-11-25"
+    invalid_date_only = "2018-11-25T21:00:00"
+
+    assert {:ok, valid_date_only} == Validator.validate(
+      valid_date_only,
+      "ValidDateOnly",
+      [%TypeDeclaration{
+          name: "ValidDateOnly",
+          type: "date-only"
+       }]
+    )
+
+    assert {:error, :date_only} == Validator.validate(
+      invalid_date_only,
+      "InvalidDateOnly",
+      [%TypeDeclaration{
+          name: "InvalidDateOnly",
+          type: "date-only"
+       }]
+    )
+  end
 end

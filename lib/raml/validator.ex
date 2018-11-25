@@ -27,11 +27,19 @@ defmodule RAML.Validator do
   def validate(value, declaration, types)
   when is_binary(value) and is_binary(declaration) do
     type = get_type(types, declaration)
+    string_type = type.type
 
-    with :ok <- validate_pattern(value, Map.get(type, :pattern)),
-         :ok <- validate_min_length(value, Map.get(type, :min_length)),
-         :ok <- validate_max_length(value, Map.get(type, :max_length)) do
-      {:ok, value}
+    case string_type do
+      "string" ->
+        with :ok <- validate_pattern(value, Map.get(type, :pattern)),
+             :ok <- validate_min_length(value, Map.get(type, :min_length)),
+             :ok <- validate_max_length(value, Map.get(type, :max_length)) do
+          {:ok, value}
+        end
+      "date-only" ->
+        with :ok <- validate_date_only(value) do
+          {:ok, value}
+        end
     end
   end
 
@@ -218,6 +226,17 @@ defmodule RAML.Validator do
         :ok
       false ->
         {:error, :multiple_of}
+    end
+  end
+
+  def validate_date_only(date) do
+    result = Date.from_iso8601(date)
+
+    case result do
+      {:ok, _} ->
+        :ok
+      {:error, _} ->
+        {:error, :date_only}
     end
   end
 
