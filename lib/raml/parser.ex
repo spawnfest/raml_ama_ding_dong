@@ -301,7 +301,7 @@ defmodule RAML.Parser do
         end)
       %Body{media_types: media_types}
     else
-      parse_type_declaration(properties)
+      parse_type(properties)
     end
   end
 
