@@ -40,8 +40,8 @@ types:
   ShortURL:
     properties:
       shortened: URL
-      example:
-        shortened: http://localhost:4001/r/example
+    example:
+      shortened: http://localhost:4001/r/example
 /redirects:
   put:
     queryString: Redirect
