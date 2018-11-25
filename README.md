@@ -122,7 +122,7 @@ Not Found
 $ curl -H 'content-type: application/json' 'localhost:4001/redirects'
 Method Not Allowed
 $ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects'
-FIXME
+{"shortened": "http://localhost:4001/r/example"}
 ```
 
 Notice how the RAML file was used to determine which URLs to support?  
