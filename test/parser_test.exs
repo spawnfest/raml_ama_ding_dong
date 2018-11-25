@@ -77,6 +77,11 @@ defmodule RAMLParserTest do
     assert identified_key.path == "/{keyId}"
   end
 
+  test "parses the example file" do
+    _parsed = Parser.parse(fixture("raml_redirects.raml"))
+    # IO.inspect(parsed)  # FIXME
+  end
+
   defp fixture(file_name) do
     Path.expand("support/fixtures/#{file_name}", __DIR__)
   end

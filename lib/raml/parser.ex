@@ -253,22 +253,28 @@ defmodule RAML.Parser do
 
   defp parse_response(properties) do
     {'body', body} =
-      Enum.find(properties, {'body', %{ }}, &match?({'body', _body}, &1))
+      Enum.find(properties, {'body', [ ]}, &match?({'body', _body}, &1))
     %Response{
       body: parse_body(body)
     }
   end
 
   defp parse_body(properties) do
-    media_types =
-      properties
-      |> Enum.reject(fn {name, _property} ->
-        name in ~w[type example examples]c
-      end)
-      |> Enum.into(Map.new, fn {media_type, properties} ->
-        {to_string(media_type), parse_type_declaration(properties)}
-      end)
-    %Body{media_types: media_types}
+    has_media_types? = Enum.any?(properties, fn
+      {name, _property} ->
+        ?/ in name
+      _char ->
+        false
+    end)
+    if has_media_types? do
+      media_types =
+        Enum.into(properties, Map.new, fn {media_type, type} ->
+          {to_string(media_type), parse_type_declaration(type)}
+        end)
+      %Body{media_types: media_types}
+    else
+      parse_type_declaration(properties)
+    end
   end
 
   defp parse_optional(properties, name, parser \\ fn term -> term end) do

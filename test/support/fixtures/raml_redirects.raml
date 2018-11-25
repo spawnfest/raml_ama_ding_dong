@@ -1,0 +1,24 @@
+#%RAML 1.0
+title: RAML Redirects
+baseUri: http://localhost:4001
+mediaType: application/json
+types:
+  Redirect:
+    properties:
+      name:
+        type: string
+        pattern: '\A[-a-zA-Z0-9_]+\z'
+      url:
+        type: string
+        pattern: '\A\S+\z'
+  Saved:
+    properties:
+      url: string
+      example:
+        url: http://localhost:4001/r/example
+/redirects:
+  put:
+    queryString: Redirect
+    responses: 
+      200:
+        body: Saved
