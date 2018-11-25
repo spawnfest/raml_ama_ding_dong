@@ -46,6 +46,10 @@ defmodule RAML.Specification do
            {:ok, matched_method} <- Resources.validate_method(resource, method)
       do
         params = Map.merge(query_params, get_uri_params(resource.path, path))
+        type_to_validate = Map.get(resource.methods, method).query_string
+
+        RAML.Validator.validate(params, type_to_validate, types) |> IO.inspect
+
         handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, params)
       else
         :not_found -> not_found_response()
