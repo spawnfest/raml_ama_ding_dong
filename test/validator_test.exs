@@ -338,4 +338,37 @@ defmodule RAMLValidatorTest do
        }]
     )
   end
+
+  test "validate_maximum_number" do
+    value = 5
+
+    assert {:ok, value} == Validator.validate(
+      value,
+      "NoMoreThanFive",
+      [%TypeDeclaration{
+          name: "NoMoreThanFive",
+          type: "number",
+          maximum: 5
+       }]
+    )
+    assert {:error, :maximum} == Validator.validate(
+      value,
+      "NoMoreThanTwo",
+      [%TypeDeclaration{
+          name: "NoMoreThanTwo",
+          type: "number",
+          maximum: 2
+       }]
+    )
+
+    assert {:ok, 99999999999999} == Validator.validate(
+      99999999999999,
+      "NilMaximum",
+      [%TypeDeclaration{
+          name: "NilMaximum",
+          type: "number"
+       }]
+    )
+  end
+
 end
