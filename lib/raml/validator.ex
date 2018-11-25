@@ -35,6 +35,14 @@ defmodule RAML.Validator do
     end
   end
 
+  def validate(number, declaration, types)
+  when is_number(number) and is_binary(declaration) do
+    type = get_type(types, declaration)
+
+    with :ok <- validate_minimum_number(number, Map.get(type, :minimum)) do
+      {:ok, number}
+    end
+  end
 
   def validate_max_properties(fields, max) when is_integer(max) do
     actual = Map.size(fields)
@@ -159,6 +167,19 @@ defmodule RAML.Validator do
         :ok
       false ->
         {:error, :max_length}
+    end
+  end
+
+  def validate_minimum_number(number, nil) do
+    validate_minimum_number(number, 0)
+  end
+
+  def validate_minimum_number(number, min) do
+    case number >= min do
+      true ->
+        :ok
+      false ->
+        {:error, :minimum}
     end
   end
 

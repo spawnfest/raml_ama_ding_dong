@@ -306,4 +306,36 @@ defmodule RAMLValidatorTest do
        }]
     )
   end
+
+  test "validate_minimum_number" do
+    value = 5
+
+    assert {:ok, value} == Validator.validate(
+      value,
+      "NoLessThanFive",
+      [%TypeDeclaration{
+          name: "NoLessThanFive",
+          type: "number",
+          minimum: 5
+       }]
+    )
+    assert {:error, :minimum} == Validator.validate(
+      value,
+      "NoLessThanEleven",
+      [%TypeDeclaration{
+          name: "NoLessThanEleven",
+          type: "number",
+          minimum: 11
+       }]
+    )
+
+    assert {:ok, 0} == Validator.validate(
+      0,
+      "NilMinimum",
+      [%TypeDeclaration{
+          name: "NilMinimum",
+          type: "number"
+       }]
+    )
+  end
 end
