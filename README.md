@@ -1,12 +1,14 @@
 # RAML (ama ding dong)
 
-[RAML](https://raml.org/)—**R**ESTful **A**PI **M**odeling **L**anguage—is a tool for planning APIs, 
-quickly scaffolding those plans for experimentation, validating that an API is
-conforming to shared specifications, testing against an API without requiring
-access to it, and more.  This (incomplete) Elixir implementation is intended to 
-show off its utility.
+[RAML](https://raml.org/)—**R**ESTful **A**PI **M**odeling **L**anguage—is a
+tool for planning APIs, quickly scaffolding those plans for experimentation, 
+validating parameters and responses for your API, testing what you've built 
+without actually making requests, and more.  This (incomplete) Elixir 
+implementation is intended to show off its utility.
 
 ## How do I use this thing?
+
+The best way to learn a little about RAML is to use it to build something.  This example will walk you through the construction of a two action API for creating and using 
 
 ### Step 1:  Write a RAML Specification
 

@@ -132,12 +132,17 @@ defmodule RAML.Parser do
   end
 
   defp parse_property_declaration(properties) do
-    case Enum.find(properties, &match?({'type', _value}, &1)) do
-      {'type', type} ->
-        required = parse_optional(properties, :required)
-        {(if required != false, do: "?", else: ""), type}
-      nil ->
-        {"", properties}
+    is_prop_declaration? =
+      properties
+      |> Enum.map(fn {name, _property} -> name; item -> item end)
+      |> Enum.sort
+      |> Kernel.in([['type'], ['required', 'type']])
+    if is_prop_declaration? do
+      {'type', type} = Enum.find(properties, &match?({'type', _type}, &1))
+      required = parse_optional(properties, :required)
+      {(if required != false, do: "?", else: ""), type}
+    else
+      {"", properties}
     end
   end
 
@@ -157,7 +162,7 @@ defmodule RAML.Parser do
     Map.merge(
       string,
       %{
-        pattern: parse_optional(properties, :pattern),
+        pattern: parse_optional_string(properties, :pattern),
         min_length: parse_optional(properties, :minLength),
         max_length: parse_optional(properties, :maxLength)
       }
