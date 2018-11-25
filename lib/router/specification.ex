@@ -61,7 +61,7 @@ defmodule RAML.Specification do
     %{
       content_type: "text/plain",
       status: 404,
-      body: "Not Found"
+      body: "Not Found\n"
     }
   end
 
@@ -69,7 +69,7 @@ defmodule RAML.Specification do
     %{
       content_type: "text/plain",
       status: 405,
-      body: "Method Not Allowed"
+      body: "Method Not Allowed\n"
     }
   end
 end
