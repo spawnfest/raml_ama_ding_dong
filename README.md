@@ -96,7 +96,11 @@ We need to add the RAML library to our project as a dependency, so
 insert the following line into the end of the `deps` list in `mix.exs`:
 
 ```Elixir
+  defp deps do
+    [
       {:raml_ama_ding_dong, path: "../raml_ama_ding_dong"}
+    ]
+  end
 ```
 
 Now fetch the project's dependencies:

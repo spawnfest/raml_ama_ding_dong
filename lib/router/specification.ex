@@ -46,14 +46,7 @@ defmodule RAML.Specification do
            {:ok, matched_method} <- Resources.validate_method(resource, method)
       do
         params = Map.merge(query_params, get_uri_params(resource.path, path))
-        type_to_validate = Map.get(resource.methods, method).query_string
-
-        case RAML.Validator.validate(params, type_to_validate, types) do
-          {:error, message} ->
-            make_error_response(message)
-          {:ok, _fields} ->
-            handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, params)
-        end
+        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, params, resource)
       else
         :not_found -> not_found_response()
         :method_not_allowed -> method_not_allowed_response()
@@ -62,7 +55,7 @@ defmodule RAML.Specification do
     {:reply, response, state}
   end
 
-  defp handle_method(nil, _method, _path, _headers, matched_method, _default_content_type, types, _query_params) do
+  defp handle_method(nil, _method, _path, _headers, matched_method, _default_content_type, types, _query_params, _resource) do
     # ways this could go wrong
     # missing media types
     # missing types
@@ -75,12 +68,18 @@ defmodule RAML.Specification do
 
     %{ headers: [{"content-type", "text/plain"}], status: 200, body: example }
   end
-  defp handle_method(module, method, path, headers, _matched_method, _default_content_type, _types, query_params) do
-    request = %{headers: headers, params: query_params}
+  defp handle_method(module, method, path, headers, _matched_method, _default_content_type, types, query_params, resource) do
+    type_to_validate = Map.get(resource.methods, method).query_string
+    case RAML.Validator.validate(query_params, type_to_validate, types) do
+      {:error, message} ->
+        make_error_response(message)
+      {:ok, _fields} ->
+        request = %{headers: headers, params: query_params}
 
-    {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
+        {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
 
-    %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
+        %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
+    end
   end
 
   def make_error_response(message) do
