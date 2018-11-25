@@ -6,18 +6,18 @@ defmodule RAML.Router do
   end
 
   def call(conn, _opts) do
-    {content_type, status, body} = handle_request(conn)
+    {headers, status, body} = handle_request(conn |> fetch_query_params)
 
     conn
-    |> put_resp_content_type(content_type)
+    |> merge_resp_headers(headers)
     |> send_resp(status, body)
   end
 
-  defp handle_request(%{path_info: path, method: method, req_headers: req_headers}) do
+  defp handle_request(%{path_info: path, method: method, req_headers: req_headers, params: query_params}) do
     method_atom = method |> String.downcase |> String.to_atom
     headers = req_headers |> Enum.into(%{})
-    response = RAML.Specification.response_for(path, method_atom, headers)
+    response = RAML.Specification.response_for(path, method_atom, headers, query_params)
 
-    {response.content_type, response.status, response.body}
+    {response.headers, response.status, response.body}
   end
 end

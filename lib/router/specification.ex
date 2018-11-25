@@ -25,8 +25,8 @@ defmodule RAML.Specification do
     {:noreply, %{state | contents: contents}}
   end
 
-  def response_for(path, method, headers) do
-    GenServer.call({:global, __MODULE__}, {:response_for, path, method, headers})
+  def response_for(path, method, headers, query_params) do
+    GenServer.call({:global, __MODULE__}, {:response_for, path, method, headers, query_params})
   end
 
   def contents do
@@ -37,7 +37,7 @@ defmodule RAML.Specification do
     {:reply, state.contents, state}
   end
 
-  def handle_call({:response_for, path, method, headers}, _from, state) do
+  def handle_call({:response_for, path, method, headers, query_params}, _from, state) do
     default_content_type = Map.get(state.contents, :media_type, :not_provided)
     types = state.contents.types
 
@@ -45,7 +45,7 @@ defmodule RAML.Specification do
       with {:ok, resource} <- Resources.get_resource(state.contents, path),
            {:ok, matched_method} <- Resources.validate_method(resource, method)
       do
-        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types)
+        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, query_params)
       else
         :not_found -> not_found_response()
         :method_not_allowed -> method_not_allowed_response()
@@ -54,7 +54,7 @@ defmodule RAML.Specification do
     {:reply, response, state}
   end
 
-  defp handle_method(nil, _method, _path, _headers, matched_method, _default_content_type, types) do
+  defp handle_method(nil, _method, _path, _headers, matched_method, _default_content_type, types, _query_params) do
     # ways this could go wrong
     # missing media types
     # missing types
@@ -64,20 +64,20 @@ defmodule RAML.Specification do
     resp = matched_method.responses["200"].body
     example = types |> Enum.find(&(&1.name == resp)) |> Map.get(:example) |> Map.get(:value)
 
-    %{ content_type: "text/plain", status: 200, body: example }
-  end
-  defp handle_method(module, method, path, headers, _matched_method, _default_content_type, _types) do
-    request = %{headers: headers, params: %{}}
 
-    {status, _headers, body} = :erlang.apply(module, :call, [path, method, request])
-    # give (headers, body, params, route, method)
-    # call function get (headers, status, body)
-    %{ content_type: "text/plain", status: status, body: body }
+    %{ headers: [{"content-type", "text/plain"}], status: 200, body: example }
+  end
+  defp handle_method(module, method, path, headers, _matched_method, _default_content_type, _types, query_params) do
+    request = %{headers: headers, params: query_params}
+
+    {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
+
+    %{ headers: headers, status: status, body: body }
   end
 
   def not_found_response do
     %{
-      content_type: "text/plain",
+      headers: [{"content-type", "text/plain"}],
       status: 404,
       body: "Not Found\n"
     }
@@ -85,7 +85,7 @@ defmodule RAML.Specification do
 
   def method_not_allowed_response do
     %{
-      content_type: "text/plain",
+      headers: [{"content-type", "text/plain"}],
       status: 405,
       body: "Method Not Allowed\n"
     }
