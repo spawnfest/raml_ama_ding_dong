@@ -72,7 +72,7 @@ defmodule RAML.Specification do
 
     {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
 
-    %{ headers: headers, status: status, body: Jason.encode!(body) }
+    %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
   end
 
   def not_found_response do

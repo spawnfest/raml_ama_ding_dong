@@ -220,6 +220,13 @@ one more line to the end of the `config/config.exs`:
 config :raml_ama_ding_dong, processing_module: RamlRedirects.Api
 ```
 
+Now we can talk to our fully functional API.  Let's send some requests:
+
+```bash
+$ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects?name=ex&url=http://example.com'
+{"shortened":"http://localhost:4001/r/ex"}
+```
+
 FIXME
 
 ### Step 4:  Next Steps
