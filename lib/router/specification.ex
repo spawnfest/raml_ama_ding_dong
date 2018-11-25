@@ -45,7 +45,8 @@ defmodule RAML.Specification do
       with {:ok, resource} <- Resources.get_resource(state.contents, path),
            {:ok, matched_method} <- Resources.validate_method(resource, method)
       do
-        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, query_params)
+        params = Map.merge(query_params, get_uri_params(resource.path, path))
+        handle_method(state.processing_module, method, resource.path, headers, matched_method, default_content_type, types, params)
       else
         :not_found -> not_found_response()
         :method_not_allowed -> method_not_allowed_response()
@@ -89,5 +90,20 @@ defmodule RAML.Specification do
       status: 405,
       body: "Method Not Allowed\n"
     }
+  end
+
+  defp get_uri_params(route_path, submitted_path) do
+    route_path
+    |> String.split("/", trim: true)
+    |> Enum.zip(submitted_path)
+    |> Enum.reduce(%{}, &whatever/2)
+  end
+
+  def whatever({template, actual}, acc) do
+    if String.starts_with?(template, "{") do
+      Map.put(acc, String.slice(template, 1..-2), actual)
+    else
+      acc
+    end
   end
 end
