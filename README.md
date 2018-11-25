@@ -28,10 +28,10 @@ mediaType: application/json
 types:
   Name:
     type: string
-    pattern: '\A[-a-zA-Z0-9_]+\z'
+    pattern: '^[-a-zA-Z0-9_]+$'
   URL:
     type: string
-    pattern: '\A\S+\z'
+    pattern: '^\S+$'
     example: http://example.com/
   Redirect:
     properties:
@@ -40,11 +40,14 @@ types:
   ShortURL:
     properties:
       shortened: URL
-    example: |
-      {"shortened": "http://localhost:4001/r/example"}
+    example: 
+      value: |
+        {"shortened": "http://localhost:4001/r/example"}
+      strict: false
 /redirects:
   put:
-    queryString: Redirect
+    queryString: 
+      type: Redirect
     responses: 
       200:
         body: ShortURL
