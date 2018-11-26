@@ -70,15 +70,23 @@ defmodule RAML.Specification do
   end
   defp handle_method(module, method, path, headers, _matched_method, _default_content_type, types, query_params, resource) do
     type_to_validate = Map.get(resource.methods, method).query_string
-    case RAML.Validator.validate(query_params, type_to_validate, types) do
-      {:error, message} ->
-        make_error_response(message)
-      {:ok, _fields} ->
-        request = %{headers: headers, params: query_params}
+    if is_nil(type_to_validate) do
+      request = %{headers: headers, params: query_params}
 
-        {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
+      {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
 
-        %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
+      %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
+    else
+      case RAML.Validator.validate(query_params, type_to_validate, types) do
+        {:error, message} ->
+          make_error_response(message)
+        {:ok, _fields} ->
+          request = %{headers: headers, params: query_params}
+
+          {status, headers, body} = :erlang.apply(module, :call, [path, method, request])
+
+          %{ headers: headers, status: status, body: Jason.encode!(body) <> "\n" }
+      end
     end
   end
 

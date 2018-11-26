@@ -240,7 +240,7 @@ then show the redirect to that location:
 ```bash
 $ curl -X PUT -H 'content-type: application/json' 'localhost:4001/redirects?name=ex&url=http://example.com'
 {"shortened":"http://localhost:4001/r/ex"}
-$ curl -i -H 'co ntent-type: application/json' 'localhost:4001/r/ex'
+$ curl -i -H 'content-type: application/json' 'localhost:4001/r/ex'
 HTTP/1.1 302 Found
 Location: http://example.com
 cache-control: max-age=0, private, must-revalidate
