@@ -3,7 +3,6 @@ defmodule RAML.Validator do
 
   def validate(fields, declaration, types)
   when is_map(fields) do
-    IO.inspect(fields)
     type = get_type(types, declaration)
 
     with :ok <- validate_type(Map.get(type, :type), :object),
@@ -301,7 +300,6 @@ defmodule RAML.Validator do
     end
   end
   defp get_type(types, declaration) do
-    IO.inspect(declaration)
     types
     |> Enum.filter(fn type -> type.name == declaration end)
     |> hd
