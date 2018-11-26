@@ -290,5 +290,7 @@ to do.  We would eventually love to:
 * Generate matching client code from a RAML file.
 * Provide tools to ensure that a response validates in automated server tests
   and that request validate in automated client tests.
+* We need to optimize our routing so it doesn't bottleneck behind a single 
+  `GenServer`.
   
 Thanks for taking the time to look at our code.
